@@ -67,77 +67,79 @@ export default function GameScreen() {
   );
 
   return (
-    <div className="flex flex-col h-full bg-[var(--bg)] text-[var(--navy)] relative overflow-hidden select-none">
-      {/* Topbar */}
-      <div className="shrink-0 pt-3 pb-2 px-4 border-b border-[var(--line)]">
-        <div className="flex items-center justify-between">
-          <button
-            onClick={handleBack}
-            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/5 active:scale-95 transition-all cursor-pointer"
-          >
-            <ChevronLeft size={24} strokeWidth={2.5} className="text-[var(--navy)]" />
-          </button>
-          <h1 className="text-xl font-black text-[var(--navy)]">Level {game.levelId}</h1>
-          <button
-            onClick={openSettings}
-            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/5 active:scale-95 transition-all cursor-pointer"
-          >
-            <Settings size={20} className="text-[var(--gray)]" />
-          </button>
-        </div>
-
-        {/* Stats Bar */}
-        <div className="flex items-center justify-between px-2 pt-2">
-          <div className="flex items-center gap-1.5 text-sm font-extrabold text-[var(--navy-soft)]">
-            <span>↗</span>
-            <span>{remainingArrows}</span>
+    <div className="landing-page-stage">
+      <div className="lvl-standard-app">
+        {/* Topbar */}
+        <div className="shrink-0 pt-3 pb-2 px-4 border-b border-[var(--line)]">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={handleBack}
+              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/5 active:scale-95 transition-all cursor-pointer"
+            >
+              <ChevronLeft size={24} strokeWidth={2.5} className="text-[var(--navy)]" />
+            </button>
+            <h1 className="text-xl font-black text-[var(--navy)]">Level {game.levelId}</h1>
+            <button
+              onClick={openSettings}
+              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/5 active:scale-95 transition-all cursor-pointer"
+            >
+              <Settings size={20} className="text-[var(--gray)]" />
+            </button>
           </div>
 
-          <div className="flex items-center gap-1.5">
-            {Array.from({ length: game.maxLives }, (_, i) =>
-              renderHeart(i < game.lives, i)
-            )}
+          {/* Stats Bar */}
+          <div className="flex items-center justify-between px-2 pt-2">
+            <div className="flex items-center gap-1.5 text-sm font-extrabold text-[var(--navy-soft)]">
+              <span>↗</span>
+              <span>{remainingArrows}</span>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              {Array.from({ length: game.maxLives }, (_, i) =>
+                renderHeart(i < game.lives, i)
+              )}
+            </div>
+
+            <button
+              onClick={() => dispatch({ type: 'SET_MODAL', modal: 'coin-shop' })}
+              className="flex items-center gap-1.5 text-sm font-extrabold text-[var(--navy-soft)] hover:opacity-80 active:scale-95 cursor-pointer bg-white/60 px-2 py-0.5 rounded-full"
+              aria-label="Coin Shop"
+            >
+              <span>🪙</span>
+              <span>{state.player.coins}</span>
+            </button>
           </div>
+        </div>
+
+        {/* Main Board Content for grid levels */}
+        <GameBoard />
+
+        {/* Bottom Bar for grid levels */}
+        <div className="flex items-center justify-center gap-4 pb-6 pt-2 z-10">
+          <button
+            onClick={handleHint}
+            className="relative w-14 h-14 rounded-full bg-white shadow-md flex items-center justify-center hover:shadow-lg transition-all active:scale-95 cursor-pointer"
+          >
+            <Lightbulb size={24} className="text-[var(--indigo)]" />
+            <span className="absolute -top-1 -right-1 bg-[var(--indigo)] text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">
+              AD
+            </span>
+          </button>
 
           <button
-            onClick={() => dispatch({ type: 'SET_MODAL', modal: 'coin-shop' })}
-            className="flex items-center gap-1.5 text-sm font-extrabold text-[var(--navy-soft)] hover:opacity-80 active:scale-95 cursor-pointer bg-white/60 px-2 py-0.5 rounded-full"
-            aria-label="Coin Shop"
+            onClick={() => dispatch({ type: 'TOGGLE_SETTING', key: 'showGrid' })}
+            className={`w-14 h-14 rounded-full flex items-center justify-center transition-all active:scale-95 shadow-md cursor-pointer ${
+              state.player.settings.showGrid
+                ? 'bg-white ring-2 ring-[var(--indigo)]'
+                : 'bg-white/80'
+            }`}
           >
-            <span>🪙</span>
-            <span>{state.player.coins}</span>
+            <Grid3x3
+              size={22}
+              className={state.player.settings.showGrid ? 'text-[var(--indigo)]' : 'text-[var(--gray)]'}
+            />
           </button>
         </div>
-      </div>
-
-      {/* Main Board Content for grid levels */}
-      <GameBoard />
-
-      {/* Bottom Bar for grid levels */}
-      <div className="flex items-center justify-center gap-4 pb-6 pt-2 z-10">
-        <button
-          onClick={handleHint}
-          className="relative w-14 h-14 rounded-full bg-white shadow-md flex items-center justify-center hover:shadow-lg transition-all active:scale-95 cursor-pointer"
-        >
-          <Lightbulb size={24} className="text-[var(--indigo)]" />
-          <span className="absolute -top-1 -right-1 bg-[var(--indigo)] text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">
-            AD
-          </span>
-        </button>
-
-        <button
-          onClick={() => dispatch({ type: 'TOGGLE_SETTING', key: 'showGrid' })}
-          className={`w-14 h-14 rounded-full flex items-center justify-center transition-all active:scale-95 shadow-md cursor-pointer ${
-            state.player.settings.showGrid
-              ? 'bg-white ring-2 ring-[var(--indigo)]'
-              : 'bg-white/80'
-          }`}
-        >
-          <Grid3x3
-            size={22}
-            className={state.player.settings.showGrid ? 'text-[var(--indigo)]' : 'text-[var(--gray)]'}
-          />
-        </button>
       </div>
     </div>
   );

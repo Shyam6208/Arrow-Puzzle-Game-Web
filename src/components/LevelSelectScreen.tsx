@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import { ChevronLeft, Lock, CheckCircle } from 'lucide-react';
 import { useStore } from '../hooks/useStore';
 import { getTotalLevels } from '../game/levels';
-import BannerAd from './BannerAd';
 
 export default function LevelSelectScreen() {
   const { state, dispatch } = useStore();
@@ -16,8 +15,10 @@ export default function LevelSelectScreen() {
   const completedCount = Object.values(player.levelProgress || {}).filter((p) => p.completed).length;
 
   return (
-    <div className="flex flex-col h-full min-h-screen bg-[#edf2f7] overflow-y-auto no-scrollbar font-['Nunito']">
-      {/* Top Header */}
+    <div className="landing-page-stage">
+      <div className="landing-page !p-0 flex flex-col justify-between">
+        <div className="flex-1 flex flex-col overflow-y-auto no-scrollbar">
+          {/* Top Header */}
       <div className="flex items-center justify-between px-4 pt-4 pb-2">
         <button
           onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'home' })}
@@ -122,8 +123,8 @@ export default function LevelSelectScreen() {
         </div>
       </div>
 
-      {/* Monetization: Bottom Banner Ad */}
-      <BannerAd className="my-2 shrink-0" />
+        </div>
+      </div>
     </div>
   );
 }

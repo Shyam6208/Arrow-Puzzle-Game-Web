@@ -14,7 +14,7 @@ interface ArrowDef {
 
 const RAW_ARROWS: ArrowDef[] = [
   { id: 'a0', pts: [[6, 0], [9, 0], [9, 1], [11, 1], [11, 2], [8, 2], [8, 1], [7, 1], [7, 2]] },
-  { id: 'a1', pts: [[24, 1], [22, 1], [22, 0], [19, 0], [19, 1], [17, 1], [17, 3], [15, 3]] },
+  { id: 'a1', pts: [[24, 1], [22, 1], [22, 0], [19, 0], [19, 1], [17, 1], [17, 3], [15, 3], [15, 4]] },
   { id: 'a2', pts: [[3, 1], [4, 1], [4, 2], [2, 2], [2, 3], [1, 3], [1, 5]] },
   { id: 'a3', pts: [[6, 1], [5, 1], [5, 2], [6, 2], [6, 3], [13, 3]] },
   { id: 'a4', pts: [[25, 2], [21, 2], [21, 1], [20, 1], [20, 2], [18, 2], [18, 3], [25, 3]] },
@@ -98,7 +98,7 @@ const RAW_ARROWS: ArrowDef[] = [
 ];
 
 function cellsOf(def: ArrowDef): [number, number][] {
-  const out: [number, number][] = [def.pts[0]];
+  const out: [number, number][] = [];
   for (let i = 1; i < def.pts.length; i++) {
     let [c, r] = def.pts[i - 1];
     const [c2, r2] = def.pts[i];
@@ -115,7 +115,7 @@ function cellsOf(def: ArrowDef): [number, number][] {
   return out;
 }
 
-const ARROWS: (ArrowDef & { cells: [number, number][] })[] = RAW_ARROWS.map((a) => ({
+const ARROWS: Required<ArrowDef>[] = RAW_ARROWS.map((a) => ({
   ...a,
   cells: cellsOf(a),
 }));
