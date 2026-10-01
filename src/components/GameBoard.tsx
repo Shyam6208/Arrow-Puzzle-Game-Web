@@ -1,4 +1,4 @@
-﻿import { useRef, useState, useEffect, useMemo, useCallback } from 'react';
+import { useRef, useState, useEffect, useMemo, useCallback } from 'react';
 import { useStore } from '../hooks/useStore';
 import { getLevelById } from '../game/levels';
 import ArrowComponent from './Arrow';
@@ -11,12 +11,9 @@ export default function GameBoard() {
   const tapGridTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const game = state.game;
-  if (!game) return null;
-
-  const level = getLevelById(game.levelId);
-  if (!level) return null;
-
-  const { gridRows, gridCols } = level;
+  const level = game ? getLevelById(game.levelId) : null;
+  const gridRows = level?.gridRows ?? 8;
+  const gridCols = level?.gridCols ?? 6;
 
   useEffect(() => {
     function updateSize() {
@@ -32,11 +29,9 @@ export default function GameBoard() {
     return () => window.removeEventListener('resize', updateSize);
   }, [gridRows, gridCols]);
 
-  const boardWidth  = cellSize * gridCols;
-  const boardHeight = cellSize * gridRows;
-
   const occupiedCells = useMemo(() => {
     const set = new Set<string>();
+    if (!game) return set;
     for (const ar of game.arrows) {
       if (ar.state === 'removed') continue;
       for (const seg of ar.arrow.segments) {
@@ -44,7 +39,7 @@ export default function GameBoard() {
       }
     }
     return set;
-  }, [game.arrows]);
+  }, [game]);
 
   const handleTap = useCallback((id: string) => {
     dispatch({ type: 'TAP_ARROW', arrowId: id });
@@ -53,6 +48,10 @@ export default function GameBoard() {
     tapGridTimer.current = setTimeout(() => setShowTapGrid(false), 500);
   }, [dispatch]);
 
+  if (!game || !level) return null;
+
+  const boardWidth = cellSize * gridCols;
+  const boardHeight = cellSize * gridRows;
   const showGrid = state.player.settings.showGrid || showTapGrid;
 
   return (

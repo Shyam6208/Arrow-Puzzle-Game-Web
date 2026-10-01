@@ -145,6 +145,7 @@ export default function Level5() {
   const isInputLockedRef = useRef(false);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const toastTimerRef = useRef<number | null>(null);
+  const buildBoardRef = useRef<() => void>(() => {});
 
   const [hearts, setHearts] = useState(3);
   const [isWon, setIsWon] = useState(false);
@@ -361,7 +362,7 @@ export default function Level5() {
               isInputLockedRef.current = false;
               setIsWon(false);
               setHearts(3);
-              buildBoard();
+              buildBoardRef.current();
             }, 800);
           }
           return nextHearts;
@@ -472,6 +473,7 @@ export default function Level5() {
   }, [tryRemove]);
 
   useEffect(() => {
+    buildBoardRef.current = buildBoard;
     buildBoard();
     return () => {
       if (toastTimerRef.current) clearTimeout(toastTimerRef.current);

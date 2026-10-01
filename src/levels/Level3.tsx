@@ -19,8 +19,6 @@ const ARROWS: ArrowDef[] = [
   { id: 'D', pts: [[3, 1], [2, 1], [2, 3]], cells: [[3, 1], [2, 1], [2, 2], [2, 3]] },
 ];
 
-const SEQ = ['A', 'B', 'C', 'D'];
-
 interface PathInfo {
   pts: [number, number][];
   arcs: number[];
@@ -102,7 +100,7 @@ interface ArrowRuntime {
 }
 
 export default function Level3() {
-  const { state, dispatch } = useStore();
+  const { dispatch } = useStore();
   const appRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const arrowsRef = useRef<Record<string, ArrowRuntime>>({});
@@ -110,10 +108,9 @@ export default function Level3() {
   const isInputLockedRef = useRef(false);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const toastTimerRef = useRef<number | null>(null);
+  const buildBoardRef = useRef<() => void>(() => {});
 
-  const [moves, setMoves] = useState(4);
   const [hearts, setHearts] = useState(3);
-  const [coins, setCoins] = useState(state.player.coins || 80);
   const [isWon, setIsWon] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
@@ -229,8 +226,6 @@ export default function Level3() {
       a.animating = true;
       a.gone = true;
       clearedRef.current++;
-      setMoves((m) => Math.max(0, m - 1));
-      setCoins((c) => c + 5);
 
       a.g.classList.add('fly');
       const L = a.path.L;
@@ -307,7 +302,7 @@ export default function Level3() {
             window.setTimeout(() => {
               setIsWon(false);
               setHearts(3);
-              buildBoard();
+              buildBoardRef.current();
               isInputLockedRef.current = false;
             }, 1000);
           }
@@ -356,7 +351,6 @@ export default function Level3() {
     svg.innerHTML = '';
     arrowsRef.current = {};
     clearedRef.current = 0;
-    setMoves(4);
 
     ARROWS.forEach((def) => {
       const path = makePath(def);
@@ -413,28 +407,12 @@ export default function Level3() {
   }, [remove, bounce]);
 
   useEffect(() => {
+    buildBoardRef.current = buildBoard;
     buildBoard();
     return () => {
       if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
     };
   }, [buildBoard]);
-
-  const handleHint = () => {
-    const id = SEQ.find((x) => arrowsRef.current[x] && !arrowsRef.current[x].gone);
-    if (!id) {
-      showToast('Level cleared');
-      return;
-    }
-    arrowsRef.current[id].g.animate(
-      [
-        { filter: 'drop-shadow(0 0 0 transparent)' },
-        { filter: 'drop-shadow(0 0 10px rgba(91,108,243,.85))' },
-        { filter: 'drop-shadow(0 0 0 transparent)' },
-      ],
-      { duration: 700, iterations: 2 }
-    );
-    showToast('Hint');
-  };
 
   const handleRestart = () => {
     setIsWon(false);

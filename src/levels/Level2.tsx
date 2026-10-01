@@ -125,6 +125,7 @@ export default function Level2() {
   const isInputLockedRef = useRef(false);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const toastTimerRef = useRef<number | null>(null);
+  const buildBoardRef = useRef<() => void>(() => {});
 
   const [moves, setMoves] = useState(5);
   const [hearts, setHearts] = useState(3);
@@ -323,7 +324,7 @@ export default function Level2() {
             window.setTimeout(() => {
               setIsWon(false);
               setHearts(3);
-              buildBoard();
+              buildBoardRef.current();
               isInputLockedRef.current = false;
             }, 1000);
           }
@@ -431,6 +432,7 @@ export default function Level2() {
   }, [remove, bounce]);
 
   useEffect(() => {
+    buildBoardRef.current = buildBoard;
     buildBoard();
     return () => {
       if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
