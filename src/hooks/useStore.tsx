@@ -227,22 +227,27 @@ function reducer(state: StoreState, action: Action): StoreState {
       };
       savePlayer(newPlayer);
 
+      const level = getLevelById(levelId);
+      const newGame = level ? createGameState(level) : state.game;
+
       return {
         ...state,
+        game: newGame,
         player: newPlayer,
-        modal: 'win',
+        modal: 'none',
       };
     }
 
     case 'NEXT_LEVEL': {
-      if (!state.game) return state;
-      const nextId = state.game.levelId + 1;
+      const currentLevelId = state.game ? state.game.levelId : state.player.currentLevel;
+      const nextId = currentLevelId + 1;
       const nextLevel = getLevelById(nextId);
       if (!nextLevel) {
         return { ...state, screen: 'levels', modal: 'none', game: null };
       }
       return {
         ...state,
+        screen: 'game',
         modal: 'none',
         game: createGameState(nextLevel),
       };

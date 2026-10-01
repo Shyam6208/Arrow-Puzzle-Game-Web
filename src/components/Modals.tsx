@@ -75,25 +75,34 @@ function WinModal() {
       {/* Next Level button */}
       <button
         onClick={() => dispatch({ type: 'NEXT_LEVEL' })}
-        className="w-full btn-primary text-white font-bold text-base py-3.5 rounded-2xl flex items-center justify-center gap-2 mb-3"
+        className="w-full btn-primary text-white font-bold text-base py-3.5 rounded-2xl flex items-center justify-center gap-2 mb-2.5"
       >
         <Play size={18} fill="white" />
         Next Level
+      </button>
+
+      {/* Play Again button */}
+      <button
+        onClick={() => dispatch({ type: 'RESTART_LEVEL' })}
+        className="w-full bg-[#f1f5f9] text-[#464e69] hover:bg-[#e2e8f0] font-bold text-sm py-3 rounded-xl flex items-center justify-center gap-2 mb-3 transition-colors cursor-pointer"
+      >
+        ↺ Play Again
       </button>
 
       {/* Bottom actions */}
       <div className="flex items-center gap-2">
         <button
           onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'home' })}
-          className="w-12 h-12 rounded-xl bg-[#f1f5f9] flex items-center justify-center hover:bg-[#e2e8f0] transition-colors"
+          className="flex-1 h-11 rounded-xl bg-[#f1f5f9] flex items-center justify-center gap-1.5 font-bold text-xs text-[#0f172a] hover:bg-[#e2e8f0] transition-colors cursor-pointer"
         >
-          <Home size={20} className="text-[#0f172a]" />
+          <Home size={16} className="text-[#0f172a]" />
+          Home
         </button>
         <button
           onClick={() => {
             dispatch({ type: 'SET_SCREEN', screen: 'levels' });
           }}
-          className="flex-1 h-12 rounded-xl bg-[#f1f5f9] flex items-center justify-center gap-2 font-semibold text-sm text-[#0f172a] hover:bg-[#e2e8f0] transition-colors"
+          className="flex-1 h-11 rounded-xl bg-[#f1f5f9] flex items-center justify-center gap-1.5 font-bold text-xs text-[#0f172a] hover:bg-[#e2e8f0] transition-colors cursor-pointer"
         >
           <Grid3x3 size={16} />
           All Levels

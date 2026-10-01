@@ -379,10 +379,12 @@ export default function Level2() {
             <div className="lvl2-trophy">🏆</div>
             <div className="lvl2-stars">★ ★ ★</div>
             <button className="lvl2-next" onClick={handleNextLevel}>
-              Next Level
+              Next Level ➔
+            </button>
+            <button className="lvl2-replay" onClick={handleRestart}>
+              ↺ Play Again
             </button>
             <div className="lvl2-sub">
-              <button onClick={handleRestart}>↺ Replay</button>
               <button onClick={handleHome}>⌂ Home</button>
               <button onClick={handleLevels}>▦ Levels</button>
             </div>

@@ -276,10 +276,12 @@ export default function Level1() {
             <div className="lvl1-trophy">🏆</div>
             <div className="lvl1-stars">★ ★ ★</div>
             <button className="lvl1-next" onClick={handleNextLevel}>
-              Next Level
+              Next Level ➔
+            </button>
+            <button className="lvl1-replay" onClick={handleRestart}>
+              ↺ Play Again
             </button>
             <div className="lvl1-sub-actions">
-              <button onClick={handleRestart}>↺ Replay</button>
               <button onClick={handleHome}>⌂ Home</button>
               <button onClick={handleLevels}>▦ Levels</button>
             </div>

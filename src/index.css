@@ -624,8 +624,16 @@ body {
   font-size: 18px;
   font-weight: 900;
   cursor: pointer;
-  transition: transform .12s ease;
   border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform .12s ease, box-shadow .15s ease;
+}
+
+.lvl1-next:hover {
+  box-shadow: 0 8px 20px rgba(91,108,243,.35);
 }
 
 .lvl1-next:active {
@@ -1007,11 +1015,50 @@ g.lvl2-arrow.pop {
   font-weight: 900;
   cursor: pointer;
   border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 0.12s ease, box-shadow 0.15s ease;
 }
+.lvl2-next:hover {
+  box-shadow: 0 8px 20px rgba(91,108,243,.35);
+}
+.lvl2-next:active {
+  transform: scale(0.98);
+}
+
+.lvl1-replay,
+.lvl2-replay {
+  width: 100%;
+  height: 48px;
+  border-radius: 24px;
+  background: #f1f2f6;
+  color: #464e69;
+  font-size: 16px;
+  font-weight: 900;
+  cursor: pointer;
+  border: none;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+.lvl1-replay:hover,
+.lvl2-replay:hover {
+  background: #e4e6ee;
+}
+.lvl1-replay:active,
+.lvl2-replay:active {
+  transform: scale(0.98);
+}
+
 .lvl2-sub {
   display: flex;
   gap: 10px;
-  margin-top: 11px;
+  margin-top: 10px;
 }
 .lvl2-sub button {
   flex: 1;
@@ -1022,6 +1069,10 @@ g.lvl2-arrow.pop {
   font-weight: 900;
   cursor: pointer;
   border: none;
+  transition: background 0.15s ease;
+}
+.lvl2-sub button:hover {
+  background: #e4e6ee;
 }
 
 .lvl2-toast {
