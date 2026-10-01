@@ -513,7 +513,7 @@ export default function Level6() {
       line.setAttribute('class', 'lvl6-pathline');
       const head = document.createElementNS(NS, 'path');
       head.setAttribute('class', 'lvl6-head');
-      head.setAttribute('d', 'M8 0 L-3.5 -5.5 L-3.5 5.5 Z');
+      head.setAttribute('d', 'M7.5 0 L-3.5 -5 L-3.5 5 Z');
       g.appendChild(line);
       g.appendChild(head);
       svg.appendChild(g);

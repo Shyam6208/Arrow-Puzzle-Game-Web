@@ -2336,7 +2336,7 @@ g.lvl5-arrow.pop {
 .lvl6-pathline {
   fill: none;
   stroke: var(--navy);
-  stroke-width: 5;
+  stroke-width: 4.5;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
