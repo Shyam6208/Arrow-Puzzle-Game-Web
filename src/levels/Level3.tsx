@@ -151,7 +151,7 @@ export default function Level3() {
       g.connect(ctx.destination);
       o.start(now);
       o.stop(now + 0.08);
-    } catch {}
+    } catch { }
   };
 
   const playCollisionSound = () => {
@@ -170,7 +170,7 @@ export default function Level3() {
       g.connect(ctx.destination);
       o.start(now);
       o.stop(now + 0.15);
-    } catch {}
+    } catch { }
   };
 
   const playFailSound = () => {
@@ -189,7 +189,7 @@ export default function Level3() {
       g.connect(ctx.destination);
       o.start(now);
       o.stop(now + 0.36);
-    } catch {}
+    } catch { }
   };
 
   const checkExitRay = (def: ArrowDef): { clear: boolean; steps: number; obstacleId: string | null } => {
