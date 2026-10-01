@@ -547,7 +547,7 @@ export default function Level5() {
 
           <button
             className="lvl5-top-btn lvl5-settings"
-            onClick={() => showToast('Settings')}
+            onClick={() => dispatch({ type: 'SET_MODAL', modal: 'pause' })}
             aria-label="Settings"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round">

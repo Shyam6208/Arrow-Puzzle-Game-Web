@@ -518,10 +518,14 @@ export default function Level2() {
               </span>
             ))}
           </div>
-          <div className="lvl2-pill">
+          <button
+            className="lvl2-pill cursor-pointer hover:opacity-85 active:scale-95 transition-all"
+            onClick={() => dispatch({ type: 'SET_MODAL', modal: 'coin-shop' })}
+            aria-label="Coin Shop"
+          >
             <span className="lvl2-coin">★</span>
             <span id="coins">{coins}</span>
-          </div>
+          </button>
         </div>
 
         {/* Board SVG Wrap */}

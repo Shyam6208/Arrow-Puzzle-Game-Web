@@ -1,24 +1,31 @@
 import { Settings, ChevronRight, LayoutGrid } from 'lucide-react';
 import { useStore } from '../hooks/useStore';
+import { getTotalLevels } from '../game/levels';
 
 export default function HomeScreen() {
   const { state, dispatch } = useStore();
   const { player } = state;
 
-  const continueLevel = player.currentLevel || 1;
+  const totalLevels = getTotalLevels();
+  const continueLevel = Math.min(player.currentLevel || 1, totalLevels);
   const completedCount = Object.values(player.levelProgress || {}).filter((p) => p.completed).length;
 
   return (
     <div className="landing-page">
       {/* Top Bar: Coin badge on left, Settings button on right */}
       <div className="landing-topbar">
-        {/* Coin Pill */}
-        <div className="landing-coin-pill">
+        {/* Clickable Coin Pill */}
+        <button
+          onClick={() => dispatch({ type: 'SET_MODAL', modal: 'coin-shop' })}
+          className="landing-coin-pill hover:shadow-md cursor-pointer transition-all active:scale-95 border border-slate-200"
+          aria-label="Coin Shop"
+        >
           <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center shadow-inner shrink-0">
             <span className="text-white text-[10px] font-black leading-none">★</span>
           </div>
           <span className="font-extrabold text-sm text-[#0f172a]">{player.coins}</span>
-        </div>
+          <span className="text-amber-500 text-xs font-black">+</span>
+        </button>
 
         {/* Settings Button */}
         <button
@@ -69,13 +76,13 @@ export default function HomeScreen() {
               </div>
               <div>
                 <div className="card-title">All Levels</div>
-                <div className="card-sub">{completedCount} of 10</div>
+                <div className="card-sub">{completedCount} of {totalLevels}</div>
               </div>
             </button>
 
             {/* Coin Shop */}
             <button
-              onClick={() => dispatch({ type: 'ADD_COINS', amount: 20 })}
+              onClick={() => dispatch({ type: 'SET_MODAL', modal: 'coin-shop' })}
               className="landing-menu-card"
             >
               <div className="flex items-center justify-between mb-4">
@@ -88,7 +95,7 @@ export default function HomeScreen() {
               </div>
               <div>
                 <div className="card-title">Coin Shop</div>
-                <div className="card-sub">Earn coins</div>
+                <div className="card-sub">Get Free Coins</div>
               </div>
             </button>
           </div>

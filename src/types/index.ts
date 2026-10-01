@@ -91,4 +91,6 @@ export type ModalType =
   | 'win'
   | 'lose'
   | 'leave-confirm'
-  | 'coin-shop';
+  | 'coin-shop'
+  | 'how-to-play'
+  | 'reset-confirm';

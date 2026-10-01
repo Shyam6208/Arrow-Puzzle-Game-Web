@@ -1,8 +1,9 @@
-import React, { createContext, useContext, useReducer, useCallback } from 'react';
+import React, { createContext, useContext, useReducer, useCallback, useEffect } from 'react';
 import type { GameState, PlayerProfile, LevelProgress, ScreenType, ModalType, GameSettings } from '../types';
 import { createGameState, isPathClear, calculateStars } from '../game/engine';
 import { getLevelById, getTotalLevels } from '../game/levels';
 import { GAME } from '../utils/constants';
+import { sounds } from '../utils/audio';
 
 // ─── Store State ───
 interface StoreState {
@@ -20,11 +21,8 @@ const defaultSettings: GameSettings = {
 
 const defaultPlayer: PlayerProfile = {
   coins: 80,
-  currentLevel: 3,
-  levelProgress: {
-    1: { levelId: 1, completed: true, stars: 3, bestMoves: 3 },
-    2: { levelId: 2, completed: true, stars: 3, bestMoves: 5 },
-  },
+  currentLevel: 1,
+  levelProgress: {},
   settings: defaultSettings,
 };
 
@@ -57,6 +55,7 @@ type Action =
   | { type: 'TOGGLE_SETTING'; key: keyof GameSettings }
   | { type: 'USE_HINT' }
   | { type: 'ADD_COINS'; amount: number }
+  | { type: 'RESET_PROGRESS' }
   | { type: 'COMPLETE_LEVEL_DIRECT'; levelId: number; moves: number; stars: number };
 
 function reducer(state: StoreState, action: Action): StoreState {
@@ -288,6 +287,21 @@ function reducer(state: StoreState, action: Action): StoreState {
       return { ...state, player: newPlayer };
     }
 
+    case 'RESET_PROGRESS': {
+      const resetPlayer: PlayerProfile = {
+        ...defaultPlayer,
+        settings: state.player.settings,
+      };
+      savePlayer(resetPlayer);
+      return {
+        ...state,
+        player: resetPlayer,
+        screen: 'home',
+        modal: 'none',
+        game: null,
+      };
+    }
+
     default:
       return state;
   }
@@ -309,6 +323,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     game: null,
     player: loadPlayer(),
   });
+
+  useEffect(() => {
+    sounds.setEnabled(state.player.settings.soundEnabled);
+  }, [state.player.settings.soundEnabled]);
 
   const findHintArrow = useCallback((): string | null => {
     if (!state.game) return null;

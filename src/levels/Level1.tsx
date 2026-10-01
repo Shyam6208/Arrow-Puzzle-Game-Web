@@ -215,10 +215,14 @@ export default function Level1() {
                 </span>
               ))}
             </div>
-            <div className="lvl1-pill">
+            <button
+              className="lvl1-pill cursor-pointer hover:opacity-85 active:scale-95 transition-all"
+              onClick={() => dispatch({ type: 'SET_MODAL', modal: 'coin-shop' })}
+              aria-label="Coin Shop"
+            >
               <span className="lvl1-coin">★</span>
               <span id="coins">{coins}</span>
-            </div>
+            </button>
           </div>
 
           {/* Board */}

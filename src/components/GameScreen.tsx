@@ -1,7 +1,7 @@
 import { ChevronLeft, Settings, Lightbulb, Grid3x3 } from 'lucide-react';
 import { useStore } from '../hooks/useStore';
 import GameBoard from './GameBoard';
-import { getCustomLevel } from '../levels';
+import { LEVEL_COMPONENTS } from '../levels';
 
 export default function GameScreen() {
   const { state, dispatch, findHintArrow } = useStore();
@@ -9,7 +9,7 @@ export default function GameScreen() {
   if (!game) return null;
 
   // Render custom level from src/levels if defined
-  const CustomLevel = getCustomLevel(game.levelId);
+  const CustomLevel = LEVEL_COMPONENTS[game.levelId];
   if (CustomLevel) {
     return <CustomLevel />;
   }
@@ -79,10 +79,14 @@ export default function GameScreen() {
             )}
           </div>
 
-          <div className="flex items-center gap-1.5 text-sm font-extrabold text-[var(--navy-soft)]">
+          <button
+            onClick={() => dispatch({ type: 'SET_MODAL', modal: 'coin-shop' })}
+            className="flex items-center gap-1.5 text-sm font-extrabold text-[var(--navy-soft)] hover:opacity-80 active:scale-95 cursor-pointer bg-white/60 px-2 py-0.5 rounded-full"
+            aria-label="Coin Shop"
+          >
             <span>🪙</span>
             <span>{state.player.coins}</span>
-          </div>
+          </button>
         </div>
       </div>
 
