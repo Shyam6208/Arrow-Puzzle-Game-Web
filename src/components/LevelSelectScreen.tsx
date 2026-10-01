@@ -28,7 +28,7 @@ export default function LevelSelectScreen() {
           {Array.from({ length: totalLevels }, (_, i) => {
             const levelId = i + 1;
             const progress = player.levelProgress[levelId];
-            const isUnlocked = levelId <= player.currentLevel;
+            const isUnlocked = levelId <= Math.max(player.currentLevel || 1, 2);
             const isCompleted = progress?.completed;
             const stars = progress?.stars || 0;
 

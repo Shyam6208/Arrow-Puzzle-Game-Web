@@ -368,6 +368,68 @@ export default function Level2() {
     [showToast]
   );
 
+  const buildBoard = useCallback(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    svg.innerHTML = '';
+    arrowsRef.current = {};
+    clearedRef.current = 0;
+    setMoves(5);
+
+    ARROWS.forEach((def) => {
+      const path = makePath(def);
+      const dots = document.createElementNS(NS, 'g');
+      dots.setAttribute('class', 'lvl2-dots');
+      def.cells.forEach(([c, r]) => {
+        const [x, y] = P(c, r);
+        const d = document.createElementNS(NS, 'circle');
+        d.setAttribute('cx', String(x));
+        d.setAttribute('cy', String(y));
+        d.setAttribute('r', '2.4');
+        dots.appendChild(d);
+      });
+      svg.appendChild(dots);
+
+      const g = document.createElementNS(NS, 'g');
+      g.setAttribute('class', 'lvl2-arrow pop');
+      const line = document.createElementNS(NS, 'polyline');
+      line.setAttribute('class', 'lvl2-pathline');
+      const head = document.createElementNS(NS, 'path');
+      head.setAttribute('class', 'lvl2-head');
+      head.setAttribute('d', 'M11 0 L-4 -7 L-4 7 Z');
+      g.appendChild(line);
+      g.appendChild(head);
+      svg.appendChild(g);
+
+      const obj: ArrowRuntime = {
+        def,
+        path,
+        g,
+        line,
+        head,
+        dots,
+        gone: false,
+        collided: false,
+        animating: false,
+      };
+      arrowsRef.current[def.id] = obj;
+      drawArrow(line, head, g, path, 0, 1);
+
+      g.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        if (isInputLockedRef.current || obj.gone || obj.animating) return;
+
+        const ray = checkExitRay(def);
+        if (ray.clear) {
+          playTapSound();
+          remove(def.id);
+        } else {
+          bounce(def.id, ray.steps);
+        }
+      });
+    });
+  }, [remove, bounce]);
+
   useEffect(() => {
     buildBoard();
     return () => {
