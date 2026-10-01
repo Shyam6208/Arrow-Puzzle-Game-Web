@@ -352,7 +352,7 @@ export default function Level4() {
         });
       }
 
-      const bump = Math.max(14, Math.min(gapPx(id) - 10, 46));
+      const bump = Math.max(4, Math.min(gapPx(id) - 8, 22));
       const dur = 260;
       const start = performance.now();
 

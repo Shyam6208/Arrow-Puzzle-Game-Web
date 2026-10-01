@@ -44,7 +44,7 @@ const RAW_ARROWS: ArrowDef[] = [
 ];
 
 function cellsOf(def: ArrowDef): [number, number][] {
-  const out: [number, number][] = [];
+  const out: [number, number][] = [def.pts[0]];
   for (let i = 1; i < def.pts.length; i++) {
     let [c, r] = def.pts[i - 1];
     const [c2, r2] = def.pts[i];
@@ -409,7 +409,7 @@ export default function Level7() {
         appRef.current.classList.add('shake');
       }
 
-      const bump = Math.max(14, Math.min(gapPx(id) - 10, 46));
+      const bump = Math.max(4, Math.min(gapPx(id) - 8, 22));
       const dur = 420;
       const start = performance.now();
 

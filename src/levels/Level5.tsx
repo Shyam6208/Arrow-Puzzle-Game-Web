@@ -378,7 +378,7 @@ export default function Level5() {
       }
 
       // Pull the arrow toward the blocking point, then return it.
-      const bump = Math.max(14, Math.min(gapPx(id) - 6, 58));
+      const bump = Math.max(4, Math.min(gapPx(id) - 8, 22));
       const dur = 420;
       const startTime = performance.now();
 

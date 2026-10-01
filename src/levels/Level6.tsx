@@ -13,7 +13,7 @@ interface ArrowDef {
 }
 
 const RAW_ARROWS: ArrowDef[] = [
-  { id: 'a0', pts: [[6, 0], [9, 0], [9, 1], [11, 1], [11, 2], [8, 2], [8, 1], [7, 1], [7, 2]] },
+  { id: 'a0', pts: [[7, 0], [9, 0], [9, 1], [11, 1], [11, 2], [8, 2], [8, 1], [7, 1], [7, 2]] },
   { id: 'a1', pts: [[24, 1], [22, 1], [22, 0], [19, 0], [19, 1], [17, 1], [17, 3], [15, 3], [15, 4]] },
   { id: 'a2', pts: [[3, 1], [4, 1], [4, 2], [2, 2], [2, 3], [1, 3], [1, 5]] },
   { id: 'a3', pts: [[6, 1], [5, 1], [5, 2], [6, 2], [6, 3], [13, 3]] },
@@ -46,7 +46,7 @@ const RAW_ARROWS: ArrowDef[] = [
       [12, 7], [12, 8], [10, 8], [10, 10], [7, 10], [7, 12], [5, 12], [5, 8], [3, 8], [3, 9], [4, 9], [4, 13],
     ],
   },
-  { id: 'a12', pts: [[6, 8], [9, 8], [9, 9], [7, 9]] },
+  { id: 'a12', pts: [[7, 8], [9, 8], [9, 9], [7, 9]] },
   { id: 'a13', pts: [[13, 8], [13, 9], [11, 9], [11, 10], [13, 10], [13, 14]] },
   { id: 'a14', pts: [[27, 6], [27, 10], [26, 10], [26, 11], [25, 11], [25, 9], [26, 9], [26, 3]] },
   { id: 'a15', pts: [[1, 11], [2, 11], [2, 14], [3, 14], [3, 15]] },
@@ -98,7 +98,7 @@ const RAW_ARROWS: ArrowDef[] = [
 ];
 
 function cellsOf(def: ArrowDef): [number, number][] {
-  const out: [number, number][] = [];
+  const out: [number, number][] = [def.pts[0]];
   for (let i = 1; i < def.pts.length; i++) {
     let [c, r] = def.pts[i - 1];
     const [c2, r2] = def.pts[i];
@@ -445,7 +445,7 @@ export default function Level6() {
         appRef.current.classList.add('shake');
       }
 
-      const bump = Math.max(14, Math.min(gapPx(id) - 10, 46));
+      const bump = Math.max(3, Math.min(gapPx(id) - 8, 20));
       const dur = 420;
       const start = performance.now();
 

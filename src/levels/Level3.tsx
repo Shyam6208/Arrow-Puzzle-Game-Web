@@ -311,7 +311,7 @@ export default function Level3() {
       }
 
       // Move forward to just before obstacle, then bounce back (~520ms total)
-      const maxDist = Math.max(10, Math.min(20, steps * CELL - 10));
+      const maxDist = Math.max(4, Math.min(16, steps * CELL - 10));
       const dur = 520;
       let t0: number | null = null;
 
