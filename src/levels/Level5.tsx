@@ -54,8 +54,6 @@ const ARROWS: (ArrowDef & { cells: [number, number][] })[] = RAW_ARROWS.map((a) 
   cells: cellsOf(a),
 }));
 
-const SEQ = ['A', 'B', 'C', 'D', 'E', 'F', 'K', 'J', 'G', 'H', 'S', 'I', 'L', 'N', 'M', 'O', 'Q', 'P'];
-
 interface PathInfo {
   pts: [number, number][];
   arcs: number[];
@@ -480,10 +478,53 @@ export default function Level5() {
     };
   }, [buildBoard]);
 
+  const revealSolvableHint = useCallback(() => {
+    const freeDef = ARROWS.find(
+      (a) =>
+        arrowsRef.current[a.id] &&
+        !arrowsRef.current[a.id].gone &&
+        !arrowsRef.current[a.id].busy &&
+        !isBlocked(a.id)
+    );
+
+    if (!freeDef) {
+      showToast('No solvable arrows remaining');
+      return;
+    }
+
+    const a = arrowsRef.current[freeDef.id];
+    if (a) {
+      a.g.animate(
+        [
+          { filter: 'drop-shadow(0 0 0 transparent)', transform: 'scale(1)' },
+          { filter: 'drop-shadow(0 0 18px rgba(91,108,243,1)) drop-shadow(0 0 8px rgba(245,158,11,0.9))', transform: 'scale(1.05)' },
+          { filter: 'drop-shadow(0 0 6px rgba(91,108,243,0.5))', transform: 'scale(1)' },
+          { filter: 'drop-shadow(0 0 18px rgba(91,108,243,1)) drop-shadow(0 0 8px rgba(245,158,11,0.9))', transform: 'scale(1.05)' },
+          { filter: 'drop-shadow(0 0 0 transparent)', transform: 'scale(1)' },
+        ],
+        { duration: 1500, iterations: 1 }
+      );
+      showToast('Hint: Solvable Arrow Highlighted!');
+    }
+  }, [showToast]);
+
+  useEffect(() => {
+    const onUseHint = () => revealSolvableHint();
+    window.addEventListener('arrow-puzzle:use-hint', onUseHint);
+    return () => window.removeEventListener('arrow-puzzle:use-hint', onUseHint);
+  }, [revealSolvableHint]);
+
   const handleHint = () => {
-    const id = SEQ.find((x) => arrowsRef.current[x] && !arrowsRef.current[x].gone);
-    if (!id) {
-      showToast('Level cleared');
+    const freeDef = ARROWS.find(
+      (a) =>
+        arrowsRef.current[a.id] &&
+        !arrowsRef.current[a.id].gone &&
+        !arrowsRef.current[a.id].busy &&
+        !isBlocked(a.id)
+    );
+
+    if (!freeDef) {
+      showToast('No solvable arrows remaining');
       return;
     }
 
@@ -491,19 +532,7 @@ export default function Level5() {
       rewardType: 'hint',
       title: 'Free In-Game Hint',
       rewardDescription: 'Reveals Next Solvable Arrow',
-      onReward: () => {
-        if (arrowsRef.current[id]) {
-          arrowsRef.current[id].g.animate(
-            [
-              { filter: 'drop-shadow(0 0 0 transparent)' },
-              { filter: 'drop-shadow(0 0 12px rgba(91,108,243,.9))' },
-              { filter: 'drop-shadow(0 0 0 transparent)' },
-            ],
-            { duration: 700, iterations: 2 }
-          );
-        }
-        showToast('Hint Revealed!');
-      },
+      onReward: revealSolvableHint,
     });
   };
 

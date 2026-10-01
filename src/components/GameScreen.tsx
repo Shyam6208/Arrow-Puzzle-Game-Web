@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { ChevronLeft, Settings, Lightbulb, Grid3x3 } from 'lucide-react';
 import { useStore } from '../hooks/useStore';
 import GameBoard from './GameBoard';
@@ -6,6 +7,18 @@ import { LEVEL_COMPONENTS } from '../levels';
 export default function GameScreen() {
   const { state, dispatch, findHintArrow, showRewardedAd } = useStore();
   const game = state.game;
+
+  useEffect(() => {
+    const onUseHint = () => {
+      const hintId = findHintArrow();
+      if (hintId) {
+        dispatch({ type: 'TAP_ARROW', arrowId: hintId });
+      }
+    };
+    window.addEventListener('arrow-puzzle:use-hint', onUseHint);
+    return () => window.removeEventListener('arrow-puzzle:use-hint', onUseHint);
+  }, [findHintArrow, dispatch]);
+
   if (!game) return null;
 
   // Render custom level from src/levels if defined

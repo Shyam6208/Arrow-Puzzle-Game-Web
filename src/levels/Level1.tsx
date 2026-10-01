@@ -118,10 +118,34 @@ export default function Level1() {
     });
   };
 
+  const revealSolvableHint = useCallback(() => {
+    const unClearedIdx = arrows.findIndex((a) => !a.gone && !a.isFlying);
+    if (unClearedIdx === -1) {
+      showToast('No solvable arrows remaining');
+      return;
+    }
+
+    setArrows((prev) =>
+      prev.map((a, idx) => (idx === unClearedIdx ? { ...a, hinting: true } : a))
+    );
+    window.setTimeout(() => {
+      setArrows((prev) =>
+        prev.map((a, idx) => (idx === unClearedIdx ? { ...a, hinting: false } : a))
+      );
+    }, 1800);
+    showToast('Hint: Solvable Arrow Highlighted!');
+  }, [arrows, showToast]);
+
+  useEffect(() => {
+    const onUseHint = () => revealSolvableHint();
+    window.addEventListener('arrow-puzzle:use-hint', onUseHint);
+    return () => window.removeEventListener('arrow-puzzle:use-hint', onUseHint);
+  }, [revealSolvableHint]);
+
   const handleHint = () => {
     const unClearedIdx = arrows.findIndex((a) => !a.gone && !a.isFlying);
     if (unClearedIdx === -1) {
-      showToast('Level cleared');
+      showToast('No solvable arrows remaining');
       return;
     }
 
@@ -129,17 +153,7 @@ export default function Level1() {
       rewardType: 'hint',
       title: 'Free In-Game Hint',
       rewardDescription: 'Reveals Next Solvable Arrow',
-      onReward: () => {
-        setArrows((prev) =>
-          prev.map((a, idx) => (idx === unClearedIdx ? { ...a, hinting: true } : a))
-        );
-        window.setTimeout(() => {
-          setArrows((prev) =>
-            prev.map((a, idx) => (idx === unClearedIdx ? { ...a, hinting: false } : a))
-          );
-        }, 1500);
-        showToast('Hint Revealed!');
-      },
+      onReward: revealSolvableHint,
     });
   };
 
