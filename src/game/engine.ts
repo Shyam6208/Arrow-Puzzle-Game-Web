@@ -1,4 +1,4 @@
-import type { Arrow, ArrowRuntime, GameState, LevelData } from '../types';
+import type { Arrow, ArrowRuntime, Direction, GameState, LevelData } from '../types';
 
 /**
  * Check if an arrow's exit path is clear of other arrows.
@@ -72,8 +72,6 @@ export function getSlideOffset(
   gridCols: number,
   cellSize: number
 ): { x: number; y: number; dist: number } {
-  const head = arrow.segments[arrow.segments.length - 1];
-  
   // Calculate a generic safe exit distance that will clear any board
   const exitDist = (Math.max(gridRows, gridCols) + arrow.segments.length + 2) * cellSize;
 

@@ -5,8 +5,8 @@ import { calculateStars } from '../game/engine';
 import { getLevelById } from '../game/levels';
 
 export default function Modals() {
-  const { state, dispatch } = useStore();
-  const { modal, game, player } = state;
+  const { state } = useStore();
+  const { modal } = state;
 
   return (
     <AnimatePresence>

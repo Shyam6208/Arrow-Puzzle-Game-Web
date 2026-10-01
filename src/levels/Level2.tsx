@@ -382,6 +382,7 @@ export default function Level2() {
               Next Level
             </button>
             <div className="lvl2-sub">
+              <button onClick={handleRestart}>↺ Replay</button>
               <button onClick={handleHome}>⌂ Home</button>
               <button onClick={handleLevels}>▦ Levels</button>
             </div>

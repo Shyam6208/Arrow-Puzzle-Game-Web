@@ -59,22 +59,18 @@ const level3: LevelData = {
   gridCols: 9,
   par: 7,
   difficulty: 3,
-  arrows: [
-    // Top horizontal right
-    makeArrow([{ row: 1, col: 2 }, { row: 1, col: 3 }, { row: 1, col: 4 }, { row: 1, col: 5 }, { row: 1, col: 6 }], 'right'),
-    // Right vertical up
-    makeArrow([{ row: 6, col: 6 }, { row: 5, col: 6 }, { row: 4, col: 6 }, { row: 3, col: 6 }, { row: 2, col: 6 }], 'up'),
-    // Left vertical down
-    makeArrow([{ row: 1, col: 2 }, { row: 2, col: 2 }, { row: 3, col: 2 }, { row: 4, col: 2 }, { row: 5, col: 2 }, { row: 6, col: 2 }], 'down'),
-    // Middle horizontal right (short)
-    makeArrow([{ row: 3, col: 3 }, { row: 3, col: 4 }, { row: 3, col: 5 }], 'right'),
-    // Inner box bottom right
-    makeArrow([{ row: 5, col: 4 }, { row: 5, col: 5 }, { row: 5, col: 6 }], 'right'),
-    // Bottom horizontal right
-    makeArrow([{ row: 6, col: 3 }, { row: 6, col: 4 }], 'right'),
-    // Inner arrow down
-    makeArrow([{ row: 3, col: 4 }, { row: 4, col: 4 }], 'down'),
-  ],
+  arrows: (() => {
+    arrowIdCounter = 100; // Reset for level 3
+    return [
+      makeArrow([{ row: 1, col: 3 }, { row: 1, col: 4 }, { row: 1, col: 5 }, { row: 1, col: 6 }], 'right'),
+      makeArrow([{ row: 6, col: 6 }, { row: 5, col: 6 }, { row: 4, col: 6 }, { row: 3, col: 6 }, { row: 2, col: 6 }], 'up'),
+      makeArrow([{ row: 1, col: 2 }, { row: 2, col: 2 }, { row: 3, col: 2 }, { row: 4, col: 2 }, { row: 5, col: 2 }, { row: 6, col: 2 }], 'down'),
+      makeArrow([{ row: 3, col: 3 }, { row: 3, col: 4 }, { row: 3, col: 5 }], 'right'),
+      makeArrow([{ row: 5, col: 4 }, { row: 5, col: 5 }], 'right'),
+      makeArrow([{ row: 6, col: 3 }, { row: 6, col: 4 }], 'right'),
+      makeArrow([{ row: 4, col: 3 }, { row: 4, col: 4 }], 'right'),
+    ];
+  })(),
 };
 
 const level4: LevelData = {
@@ -192,31 +188,10 @@ const level10: LevelData = {
   ],
 };
 
-// Fix level3 - segments can't overlap. Let me rebuild it properly
-const level3Fixed: LevelData = {
-  id: 3,
-  gridRows: 9,
-  gridCols: 9,
-  par: 7,
-  difficulty: 3,
-  arrows: (() => {
-    arrowIdCounter = 100; // Reset for level 3
-    return [
-      makeArrow([{ row: 1, col: 3 }, { row: 1, col: 4 }, { row: 1, col: 5 }, { row: 1, col: 6 }], 'right'),
-      makeArrow([{ row: 6, col: 6 }, { row: 5, col: 6 }, { row: 4, col: 6 }, { row: 3, col: 6 }, { row: 2, col: 6 }], 'up'),
-      makeArrow([{ row: 1, col: 2 }, { row: 2, col: 2 }, { row: 3, col: 2 }, { row: 4, col: 2 }, { row: 5, col: 2 }, { row: 6, col: 2 }], 'down'),
-      makeArrow([{ row: 3, col: 3 }, { row: 3, col: 4 }, { row: 3, col: 5 }], 'right'),
-      makeArrow([{ row: 5, col: 4 }, { row: 5, col: 5 }], 'right'),
-      makeArrow([{ row: 6, col: 3 }, { row: 6, col: 4 }], 'right'),
-      makeArrow([{ row: 4, col: 3 }, { row: 4, col: 4 }], 'right'),
-    ];
-  })(),
-};
-
 export const ALL_LEVELS: LevelData[] = [
   level1,
   level2,
-  level3Fixed,
+  level3,
   level4,
   level5,
   level6,

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Lock, CheckCircle } from 'lucide-react';
+import { ChevronLeft, Lock, CheckCircle } from 'lucide-react';
 import { useStore } from '../hooks/useStore';
 import { getTotalLevels } from '../game/levels';
 
