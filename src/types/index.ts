@@ -93,4 +93,5 @@ export type ModalType =
   | 'leave-confirm'
   | 'coin-shop'
   | 'how-to-play'
-  | 'reset-confirm';
+  | 'reset-confirm'
+  | 'leaderboard';

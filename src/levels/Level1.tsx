@@ -11,7 +11,7 @@ interface ArrowItem {
 }
 
 export default function Level1() {
-  const { state, dispatch } = useStore();
+  const { state, dispatch, showRewardedAd } = useStore();
   const [arrows, setArrows] = useState<ArrowItem[]>([
     { id: 0, isFlying: false, gone: false, hinting: false },
     { id: 1, isFlying: false, gone: false, hinting: false },
@@ -125,17 +125,22 @@ export default function Level1() {
       return;
     }
 
-    setArrows((prev) =>
-      prev.map((a, idx) => (idx === unClearedIdx ? { ...a, hinting: true } : a))
-    );
-
-    window.setTimeout(() => {
-      setArrows((prev) =>
-        prev.map((a, idx) => (idx === unClearedIdx ? { ...a, hinting: false } : a))
-      );
-    }, 1400);
-
-    showToast('Hint');
+    showRewardedAd({
+      rewardType: 'hint',
+      title: 'Free In-Game Hint',
+      rewardDescription: 'Reveals Next Solvable Arrow',
+      onReward: () => {
+        setArrows((prev) =>
+          prev.map((a, idx) => (idx === unClearedIdx ? { ...a, hinting: true } : a))
+        );
+        window.setTimeout(() => {
+          setArrows((prev) =>
+            prev.map((a, idx) => (idx === unClearedIdx ? { ...a, hinting: false } : a))
+          );
+        }, 1500);
+        showToast('Hint Revealed!');
+      },
+    });
   };
 
   const handleRestart = () => {

@@ -123,7 +123,7 @@ interface ArrowRuntime {
 }
 
 export default function Level4() {
-  const { dispatch } = useStore();
+  const { dispatch, showRewardedAd } = useStore();
   const appRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const arrowsRef = useRef<Record<string, ArrowRuntime>>({});
@@ -460,15 +460,25 @@ export default function Level4() {
       showToast('Level cleared');
       return;
     }
-    arrowsRef.current[id].g.animate(
-      [
-        { filter: 'drop-shadow(0 0 0 transparent)' },
-        { filter: 'drop-shadow(0 0 10px rgba(91,108,243,.85))' },
-        { filter: 'drop-shadow(0 0 0 transparent)' },
-      ],
-      { duration: 700, iterations: 2 }
-    );
-    showToast('Hint');
+
+    showRewardedAd({
+      rewardType: 'hint',
+      title: 'Free In-Game Hint',
+      rewardDescription: 'Reveals Next Solvable Arrow',
+      onReward: () => {
+        if (arrowsRef.current[id]) {
+          arrowsRef.current[id].g.animate(
+            [
+              { filter: 'drop-shadow(0 0 0 transparent)' },
+              { filter: 'drop-shadow(0 0 12px rgba(91,108,243,.9))' },
+              { filter: 'drop-shadow(0 0 0 transparent)' },
+            ],
+            { duration: 700, iterations: 2 }
+          );
+        }
+        showToast('Hint Revealed!');
+      },
+    });
   };
 
   const handleRestart = () => {

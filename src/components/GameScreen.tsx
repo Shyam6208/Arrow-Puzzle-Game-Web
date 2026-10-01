@@ -4,7 +4,7 @@ import GameBoard from './GameBoard';
 import { LEVEL_COMPONENTS } from '../levels';
 
 export default function GameScreen() {
-  const { state, dispatch, findHintArrow } = useStore();
+  const { state, dispatch, findHintArrow, showRewardedAd } = useStore();
   const game = state.game;
   if (!game) return null;
 
@@ -18,9 +18,16 @@ export default function GameScreen() {
 
   const handleHint = () => {
     const hintId = findHintArrow();
-    if (hintId) {
-      dispatch({ type: 'TAP_ARROW', arrowId: hintId });
-    }
+    if (!hintId) return;
+
+    showRewardedAd({
+      rewardType: 'hint',
+      title: 'Free In-Game Hint',
+      rewardDescription: 'Reveals Next Solvable Arrow',
+      onReward: () => {
+        dispatch({ type: 'TAP_ARROW', arrowId: hintId });
+      },
+    });
   };
 
   const handleBack = () => {

@@ -4,6 +4,7 @@ import { createGameState, isPathClear, calculateStars } from '../game/engine';
 import { getLevelById, getTotalLevels } from '../game/levels';
 import { GAME } from '../utils/constants';
 import { sounds } from '../utils/audio';
+import type { RewardedAdRequest } from '../utils/ads';
 
 // ─── Store State ───
 interface StoreState {
@@ -11,6 +12,7 @@ interface StoreState {
   modal: ModalType;
   game: GameState | null;
   player: PlayerProfile;
+  activeAdRequest: RewardedAdRequest | null;
 }
 
 const defaultSettings: GameSettings = {
@@ -50,12 +52,18 @@ type Action =
   | { type: 'ARROW_MOVED'; arrowId: string }
   | { type: 'ARROW_SHAKE_DONE'; arrowId: string }
   | { type: 'RESTART_LEVEL' }
+  | { type: 'REVIVE_LEVEL' }
   | { type: 'COMPLETE_LEVEL' }
   | { type: 'NEXT_LEVEL' }
   | { type: 'TOGGLE_SETTING'; key: keyof GameSettings }
   | { type: 'USE_HINT' }
   | { type: 'ADD_COINS'; amount: number }
+  | { type: 'SPEND_COINS'; amount: number }
+  | { type: 'BUY_EXTRA_LIFE' }
+  | { type: 'BUY_SKIP_LEVEL' }
   | { type: 'RESET_PROGRESS' }
+  | { type: 'REQUEST_REWARDED_AD'; request: RewardedAdRequest }
+  | { type: 'CLOSE_REWARDED_AD' }
   | { type: 'COMPLETE_LEVEL_DIRECT'; levelId: number; moves: number; stars: number };
 
 function reducer(state: StoreState, action: Action): StoreState {
@@ -202,6 +210,33 @@ function reducer(state: StoreState, action: Action): StoreState {
       };
     }
 
+    case 'REVIVE_LEVEL': {
+      if (!state.game) return state;
+      return {
+        ...state,
+        modal: 'none',
+        game: {
+          ...state.game,
+          lives: 1,
+          isFailed: false,
+        },
+      };
+    }
+
+    case 'REQUEST_REWARDED_AD': {
+      return {
+        ...state,
+        activeAdRequest: action.request,
+      };
+    }
+
+    case 'CLOSE_REWARDED_AD': {
+      return {
+        ...state,
+        activeAdRequest: null,
+      };
+    }
+
     case 'COMPLETE_LEVEL':
       return state;
 
@@ -268,8 +303,6 @@ function reducer(state: StoreState, action: Action): StoreState {
 
     case 'USE_HINT': {
       if (state.player.coins < GAME.coinsForHint) return state;
-      // Hint: find a moveable arrow and highlight it
-      // Deduct coins
       const newPlayer = {
         ...state.player,
         coins: state.player.coins - GAME.coinsForHint,
@@ -285,6 +318,75 @@ function reducer(state: StoreState, action: Action): StoreState {
       };
       savePlayer(newPlayer);
       return { ...state, player: newPlayer };
+    }
+
+    case 'SPEND_COINS': {
+      if (state.player.coins < action.amount) return state;
+      const newPlayer = {
+        ...state.player,
+        coins: state.player.coins - action.amount,
+      };
+      savePlayer(newPlayer);
+      return { ...state, player: newPlayer };
+    }
+
+    case 'BUY_EXTRA_LIFE': {
+      if (state.player.coins < GAME.coinsForExtraLife || !state.game) return state;
+      const newPlayer = {
+        ...state.player,
+        coins: state.player.coins - GAME.coinsForExtraLife,
+      };
+      savePlayer(newPlayer);
+      return {
+        ...state,
+        player: newPlayer,
+        modal: 'none',
+        game: {
+          ...state.game,
+          lives: Math.min(state.game.lives + 1, state.game.maxLives),
+          isFailed: false,
+        },
+      };
+    }
+
+    case 'BUY_SKIP_LEVEL': {
+      if (state.player.coins < GAME.coinsForSkip) return state;
+      const currentLevelId = state.game ? state.game.levelId : state.player.currentLevel;
+      const nextId = currentLevelId + 1;
+      const nextLevel = getLevelById(nextId);
+
+      // Mark current level as completed with 1 star
+      const progress: LevelProgress = {
+        levelId: currentLevelId,
+        completed: true,
+        stars: 1,
+        bestMoves: 999,
+      };
+      const existing = state.player.levelProgress[currentLevelId];
+      const finalProgress = existing && existing.completed ? existing : progress;
+
+      const newCurrentLevel = Math.max(state.player.currentLevel, currentLevelId + 1);
+      const newPlayer = {
+        ...state.player,
+        coins: state.player.coins - GAME.coinsForSkip,
+        currentLevel: Math.min(newCurrentLevel, getTotalLevels()),
+        levelProgress: {
+          ...state.player.levelProgress,
+          [currentLevelId]: finalProgress,
+        },
+      };
+      savePlayer(newPlayer);
+
+      if (!nextLevel) {
+        return { ...state, player: newPlayer, screen: 'levels', modal: 'none', game: null };
+      }
+      return {
+        ...state,
+        player: newPlayer,
+        screen: 'game',
+        modal: 'none',
+        game: createGameState(nextLevel),
+      };
     }
 
     case 'RESET_PROGRESS': {
@@ -312,6 +414,8 @@ interface StoreContextType {
   state: StoreState;
   dispatch: React.Dispatch<Action>;
   findHintArrow: () => string | null;
+  showRewardedAd: (request: RewardedAdRequest) => void;
+  closeRewardedAd: () => void;
 }
 
 const StoreContext = createContext<StoreContextType | null>(null);
@@ -322,11 +426,20 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     modal: 'none',
     game: null,
     player: loadPlayer(),
+    activeAdRequest: null,
   });
 
   useEffect(() => {
     sounds.setEnabled(state.player.settings.soundEnabled);
   }, [state.player.settings.soundEnabled]);
+
+  const showRewardedAd = useCallback((request: RewardedAdRequest) => {
+    dispatch({ type: 'REQUEST_REWARDED_AD', request });
+  }, []);
+
+  const closeRewardedAd = useCallback(() => {
+    dispatch({ type: 'CLOSE_REWARDED_AD' });
+  }, []);
 
   const findHintArrow = useCallback((): string | null => {
     if (!state.game) return null;
@@ -343,7 +456,15 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, [state.game]);
 
   return (
-    <StoreContext.Provider value={{ state, dispatch, findHintArrow }}>
+    <StoreContext.Provider
+      value={{
+        state,
+        dispatch,
+        findHintArrow,
+        showRewardedAd,
+        closeRewardedAd,
+      }}
+    >
       {children}
     </StoreContext.Provider>
   );

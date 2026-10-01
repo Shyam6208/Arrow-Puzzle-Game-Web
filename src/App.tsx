@@ -4,9 +4,10 @@ import HomeScreen from './components/HomeScreen';
 import LevelSelectScreen from './components/LevelSelectScreen';
 import GameScreen from './components/GameScreen';
 import Modals from './components/Modals';
+import RewardedAdModal from './components/RewardedAdModal';
 
 function AppContent() {
-  const { state } = useStore();
+  const { state, closeRewardedAd } = useStore();
 
   return (
     <div className="w-full h-full min-h-screen bg-[#edf2f7] flex flex-col font-sans">
@@ -50,6 +51,11 @@ function AppContent() {
       </AnimatePresence>
 
       <Modals />
+
+      <RewardedAdModal
+        request={state.activeAdRequest}
+        onClose={closeRewardedAd}
+      />
     </div>
   );
 }

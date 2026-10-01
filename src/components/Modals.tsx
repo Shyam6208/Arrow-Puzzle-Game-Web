@@ -18,9 +18,10 @@ import {
   Check,
 } from 'lucide-react';
 import { calculateStars } from '../game/engine';
-import { getLevelById } from '../game/levels';
+import { getLevelById, getTotalLevels, ALL_LEVELS } from '../game/levels';
 import { sounds, triggerHaptic } from '../utils/audio';
 import { triggerConfetti } from '../utils/confetti';
+import { GAME } from '../utils/constants';
 
 export default function Modals() {
   const { state, dispatch } = useStore();
@@ -41,7 +42,7 @@ export default function Modals() {
           <div
             className="game-modal-backdrop"
             onClick={() => {
-              if (modal === 'pause' || modal === 'coin-shop' || modal === 'how-to-play') {
+              if (modal === 'pause' || modal === 'coin-shop' || modal === 'how-to-play' || modal === 'leaderboard') {
                 dispatch({ type: 'SET_MODAL', modal: 'none' });
               }
             }}
@@ -62,6 +63,7 @@ export default function Modals() {
             {modal === 'coin-shop' && <CoinShopModal />}
             {modal === 'how-to-play' && <HowToPlayModal />}
             {modal === 'reset-confirm' && <ResetConfirmModal />}
+            {modal === 'leaderboard' && <LeaderboardModal />}
           </motion.div>
         </motion.div>
       )}
@@ -73,7 +75,7 @@ export default function Modals() {
 // 1. Win Modal
 // ─────────────────────────────────────────────────────────────
 function WinModal() {
-  const { state, dispatch } = useStore();
+  const { state, dispatch, showRewardedAd } = useStore();
   const game = state.game!;
   const level = getLevelById(game.levelId);
   const stars = level ? calculateStars(game.moves, level.par) : 1;
@@ -115,10 +117,28 @@ function WinModal() {
       {/* Next Level button */}
       <button
         onClick={() => dispatch({ type: 'NEXT_LEVEL' })}
-        className="modal-btn-primary !mt-0 mb-2.5"
+        className="modal-btn-primary !mt-0 mb-2"
       >
         <Play size={18} fill="white" />
         Next Level
+      </button>
+
+      {/* 2x Coins with Ad */}
+      <button
+        onClick={() => {
+          showRewardedAd({
+            rewardType: 'double_win',
+            title: 'Double Level Coins',
+            rewardDescription: '+40 Bonus Coins',
+            onReward: () => {
+              dispatch({ type: 'ADD_COINS', amount: 40 });
+            },
+          });
+        }}
+        className="w-full h-11 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-amber-950 font-black text-sm shadow-md flex items-center justify-center gap-2 mb-2.5 cursor-pointer active:scale-98 transition-all"
+      >
+        <span className="text-lg">🪙</span>
+        <span>Claim 2x Coins (Watch Ad)</span>
       </button>
 
       {/* Play Again button */}
@@ -155,7 +175,7 @@ function WinModal() {
 // 2. Lose Modal
 // ─────────────────────────────────────────────────────────────
 function LoseModal() {
-  const { state, dispatch } = useStore();
+  const { state, dispatch, showRewardedAd } = useStore();
   const game = state.game!;
 
   useEffect(() => {
@@ -173,13 +193,49 @@ function LoseModal() {
         <span className="text-4xl">💔</span>
       </div>
 
+      {/* Revive with Ad Button */}
+      <button
+        onClick={() => {
+          showRewardedAd({
+            rewardType: 'revive',
+            title: 'Revive & Continue',
+            rewardDescription: '+1 Heart Revive',
+            onReward: () => {
+              dispatch({ type: 'REVIVE_LEVEL' });
+            },
+          });
+        }}
+        className="w-full h-12 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-base shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 cursor-pointer active:scale-98 transition-all mb-2.5"
+      >
+        <span className="text-xl">💖</span>
+        <span>Revive with Ad (+1 Life)</span>
+      </button>
+
+      {/* Buy Extra Life with Coins */}
+      <button
+        onClick={() => {
+          dispatch({ type: 'BUY_EXTRA_LIFE' });
+          sounds.playCoin();
+          triggerHaptic([30, 50]);
+        }}
+        disabled={state.player.coins < GAME.coinsForExtraLife}
+        className={`w-full h-11 rounded-2xl font-extrabold text-sm flex items-center justify-center gap-2 mb-2.5 transition-all cursor-pointer active:scale-98 ${
+          state.player.coins >= GAME.coinsForExtraLife
+            ? 'bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-md shadow-violet-500/20'
+            : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+        }`}
+      >
+        <span>💖</span>
+        <span>Buy +1 Life ({GAME.coinsForExtraLife} 🪙)</span>
+      </button>
+
       {/* Try Again */}
       <button
         onClick={() => dispatch({ type: 'RESTART_LEVEL' })}
-        className="modal-btn-primary !mt-0 mb-3"
+        className="w-full h-11 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-sm flex items-center justify-center gap-2 mb-3 transition-colors cursor-pointer"
       >
-        <Play size={18} fill="white" />
-        Try Again
+        <RotateCcw size={16} />
+        Restart Level
       </button>
 
       {/* Bottom actions */}
@@ -363,6 +419,72 @@ function PauseModal() {
               Skip Level
             </button>
           </div>
+
+          {/* Buy power-ups with coins */}
+          <div className="settings-group mt-3">
+            <div className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-2 px-1">
+              Spend Coins
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  if (state.player.coins >= GAME.coinsForHint && game) {
+                    dispatch({ type: 'USE_HINT' });
+                    dispatch({ type: 'SET_MODAL', modal: 'none' });
+                    sounds.playCoin();
+                  }
+                }}
+                disabled={state.player.coins < GAME.coinsForHint}
+                className={`flex-1 py-2.5 rounded-xl text-xs font-extrabold flex flex-col items-center gap-1 transition-all cursor-pointer active:scale-95 ${
+                  state.player.coins >= GAME.coinsForHint
+                    ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                    : 'bg-slate-50 text-slate-400 border border-slate-100 cursor-not-allowed'
+                }`}
+              >
+                <span className="text-lg">💡</span>
+                <span>Hint</span>
+                <span className="text-[10px] opacity-70">{GAME.coinsForHint} 🪙</span>
+              </button>
+              <button
+                onClick={() => {
+                  if (state.player.coins >= GAME.coinsForExtraLife && game) {
+                    dispatch({ type: 'BUY_EXTRA_LIFE' });
+                    sounds.playCoin();
+                    triggerHaptic([30, 50]);
+                  }
+                }}
+                disabled={!game || state.player.coins < GAME.coinsForExtraLife || (game?.lives ?? 0) >= (game?.maxLives ?? 3)}
+                className={`flex-1 py-2.5 rounded-xl text-xs font-extrabold flex flex-col items-center gap-1 transition-all cursor-pointer active:scale-95 ${
+                  game && state.player.coins >= GAME.coinsForExtraLife && game.lives < game.maxLives
+                    ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                    : 'bg-slate-50 text-slate-400 border border-slate-100 cursor-not-allowed'
+                }`}
+              >
+                <span className="text-lg">💖</span>
+                <span>+1 Life</span>
+                <span className="text-[10px] opacity-70">{GAME.coinsForExtraLife} 🪙</span>
+              </button>
+              <button
+                onClick={() => {
+                  if (state.player.coins >= GAME.coinsForSkip) {
+                    dispatch({ type: 'BUY_SKIP_LEVEL' });
+                    sounds.playCoin();
+                    triggerHaptic([30, 60]);
+                  }
+                }}
+                disabled={state.player.coins < GAME.coinsForSkip}
+                className={`flex-1 py-2.5 rounded-xl text-xs font-extrabold flex flex-col items-center gap-1 transition-all cursor-pointer active:scale-95 ${
+                  state.player.coins >= GAME.coinsForSkip
+                    ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                    : 'bg-slate-50 text-slate-400 border border-slate-100 cursor-not-allowed'
+                }`}
+              >
+                <span className="text-lg">⏭️</span>
+                <span>Skip</span>
+                <span className="text-[10px] opacity-70">{GAME.coinsForSkip} 🪙</span>
+              </button>
+            </div>
+          </div>
         </div>
       ) : (
         <button
@@ -411,7 +533,7 @@ function LeaveConfirmModal() {
 // 5. Coin Shop Modal
 // ─────────────────────────────────────────────────────────────
 function CoinShopModal() {
-  const { state, dispatch } = useStore();
+  const { state, dispatch, showRewardedAd } = useStore();
   const containerRef = useRef<HTMLDivElement>(null);
   const [claimedToday, setClaimedToday] = useState(() => {
     try {
@@ -420,7 +542,6 @@ function CoinShopModal() {
       return false;
     }
   });
-  const [adCountdown, setAdCountdown] = useState<number | null>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
   const showCelebration = (msg: string) => {
@@ -444,19 +565,15 @@ function CoinShopModal() {
   };
 
   const handleWatchAd = () => {
-    if (adCountdown !== null) return;
-    setAdCountdown(3);
-    const interval = setInterval(() => {
-      setAdCountdown((prev) => {
-        if (prev === null || prev <= 1) {
-          clearInterval(interval);
-          dispatch({ type: 'ADD_COINS', amount: 30 });
-          showCelebration('+30 Coins Earned!');
-          return null;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    showRewardedAd({
+      rewardType: 'coins',
+      title: 'Sponsor Bonus Coins',
+      rewardDescription: '+30 Free Coins',
+      onReward: () => {
+        dispatch({ type: 'ADD_COINS', amount: 30 });
+        showCelebration('+30 Coins Earned!');
+      },
+    });
   };
 
   const handleClaimPack = (amount: number, packName: string) => {
@@ -531,10 +648,9 @@ function CoinShopModal() {
         </div>
         <button
           onClick={handleWatchAd}
-          disabled={adCountdown !== null}
           className="shop-action-btn shop-btn-amber min-w-[94px]"
         >
-          {adCountdown !== null ? `Watching ${adCountdown}s` : 'Watch (+30)'}
+          Watch (+30)
         </button>
       </div>
 
@@ -695,6 +811,176 @@ function ResetConfirmModal() {
         className="w-full h-11 bg-slate-100 text-slate-700 hover:bg-slate-200 font-extrabold text-sm rounded-2xl transition-colors cursor-pointer"
       >
         Cancel & Keep Progress
+      </button>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// 8. Leaderboard Modal
+// ─────────────────────────────────────────────────────────────
+function LeaderboardModal() {
+  const { state, dispatch } = useStore();
+  const { player } = state;
+
+  const totalLevels = getTotalLevels();
+  const completedLevels = Object.values(player.levelProgress).filter((p) => p.completed);
+  const totalStars = completedLevels.reduce((sum, p) => sum + p.stars, 0);
+  const maxStars = totalLevels * 3;
+  const totalMoves = completedLevels.reduce((sum, p) => sum + p.bestMoves, 0);
+
+  // Calculate score: stars * 100 + efficiency bonus
+  const totalScore = completedLevels.reduce((sum, p) => {
+    const level = getLevelById(p.levelId);
+    const par = level?.par ?? p.bestMoves;
+    const efficiency = Math.max(0, (par - p.bestMoves + 3) * 10);
+    return sum + p.stars * 100 + efficiency;
+  }, 0);
+
+  // Rank tiers
+  const getRank = (score: number) => {
+    if (score >= 2500) return { title: 'Grandmaster', emoji: '👑', color: 'from-amber-400 to-amber-600' };
+    if (score >= 1800) return { title: 'Master', emoji: '💎', color: 'from-purple-400 to-purple-600' };
+    if (score >= 1200) return { title: 'Expert', emoji: '🔥', color: 'from-orange-400 to-orange-600' };
+    if (score >= 600) return { title: 'Challenger', emoji: '⚡', color: 'from-blue-400 to-blue-600' };
+    if (score >= 200) return { title: 'Rookie', emoji: '🌟', color: 'from-emerald-400 to-emerald-600' };
+    return { title: 'Beginner', emoji: '🎯', color: 'from-slate-400 to-slate-600' };
+  };
+
+  const rank = getRank(totalScore);
+
+  return (
+    <div className="max-h-[70vh] overflow-y-auto">
+      {/* Header */}
+      <div className="game-modal-header">
+        <h2 className="game-modal-title">Leaderboard</h2>
+        <button
+          onClick={() => dispatch({ type: 'SET_MODAL', modal: 'none' })}
+          className="game-modal-close"
+          aria-label="Close"
+        >
+          <X size={18} strokeWidth={2.5} />
+        </button>
+      </div>
+
+      {/* Rank Card */}
+      <div className={`p-4 rounded-2xl bg-gradient-to-br ${rank.color} text-white mb-4 shadow-lg`}>
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <div className="text-xs font-bold opacity-80 uppercase tracking-wider">Your Rank</div>
+            <div className="text-2xl font-black">{rank.emoji} {rank.title}</div>
+          </div>
+          <div className="text-right">
+            <div className="text-xs font-bold opacity-80">Total Score</div>
+            <div className="text-3xl font-black">{totalScore.toLocaleString()}</div>
+          </div>
+        </div>
+        {/* Progress to next rank */}
+        <div className="w-full bg-white/20 rounded-full h-2 overflow-hidden">
+          <div
+            className="h-full bg-white/80 rounded-full transition-all duration-500"
+            style={{ width: `${Math.min(100, (totalScore % 600) / 6)}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Summary Stats */}
+      <div className="grid grid-cols-3 gap-2 mb-4">
+        <div className="bg-slate-50 rounded-xl p-3 text-center border border-slate-100">
+          <div className="text-lg font-black text-slate-800">{completedLevels.length}/{totalLevels}</div>
+          <div className="text-[10px] font-bold text-slate-500 uppercase">Cleared</div>
+        </div>
+        <div className="bg-amber-50 rounded-xl p-3 text-center border border-amber-100">
+          <div className="text-lg font-black text-amber-700">
+            {totalStars}<span className="text-xs opacity-60">/{maxStars}</span>
+          </div>
+          <div className="text-[10px] font-bold text-amber-600 uppercase">Stars</div>
+        </div>
+        <div className="bg-blue-50 rounded-xl p-3 text-center border border-blue-100">
+          <div className="text-lg font-black text-blue-700">{totalMoves || '—'}</div>
+          <div className="text-[10px] font-bold text-blue-600 uppercase">Moves</div>
+        </div>
+      </div>
+
+      {/* Per-Level Breakdown */}
+      <div className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-2 px-1">
+        Level Breakdown
+      </div>
+
+      <div className="flex flex-col gap-1.5 mb-4">
+        {ALL_LEVELS.map((level) => {
+          const progress = player.levelProgress[level.id];
+          const isCompleted = progress?.completed;
+          const stars = progress?.stars ?? 0;
+          const bestMoves = progress?.bestMoves;
+          const levelScore = isCompleted
+            ? stars * 100 + Math.max(0, (level.par - (bestMoves ?? level.par) + 3) * 10)
+            : 0;
+
+          return (
+            <div
+              key={level.id}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all ${
+                isCompleted
+                  ? 'bg-white border-slate-200 shadow-xs'
+                  : 'bg-slate-50 border-slate-100 opacity-50'
+              }`}
+            >
+              {/* Level number */}
+              <div
+                className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm shrink-0 ${
+                  isCompleted
+                    ? 'bg-gradient-to-br from-blue-500 to-indigo-500 text-white'
+                    : 'bg-slate-200 text-slate-500'
+                }`}
+              >
+                {level.id}
+              </div>
+
+              {/* Stars */}
+              <div className="flex gap-0.5 shrink-0">
+                {[1, 2, 3].map((s) => (
+                  <span
+                    key={s}
+                    className={`text-sm ${s <= stars ? 'text-amber-500' : 'text-slate-200'}`}
+                  >
+                    ★
+                  </span>
+                ))}
+              </div>
+
+              {/* Best moves */}
+              <div className="flex-1 text-right">
+                {isCompleted ? (
+                  <div className="flex items-center justify-end gap-2">
+                    <span className="text-xs font-bold text-slate-500">
+                      {bestMoves} moves
+                    </span>
+                    <span className="text-xs font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg">
+                      {levelScore}pts
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-xs font-bold text-slate-400">Locked</span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Coin balance */}
+      <div className="flex items-center justify-center gap-2 py-2 bg-amber-50 rounded-xl border border-amber-100 mb-3">
+        <span className="text-base">🪙</span>
+        <span className="font-black text-amber-700">{player.coins} Coins</span>
+      </div>
+
+      <button
+        onClick={() => dispatch({ type: 'SET_MODAL', modal: 'none' })}
+        className="modal-btn-primary !mt-0"
+      >
+        <Check size={18} strokeWidth={3} />
+        Close
       </button>
     </div>
   );

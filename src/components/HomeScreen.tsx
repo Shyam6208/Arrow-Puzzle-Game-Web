@@ -1,6 +1,7 @@
-import { Settings, ChevronRight, LayoutGrid } from 'lucide-react';
+import { Settings, ChevronRight, LayoutGrid, Trophy } from 'lucide-react';
 import { useStore } from '../hooks/useStore';
 import { getTotalLevels } from '../game/levels';
+import BannerAd from './BannerAd';
 
 export default function HomeScreen() {
   const { state, dispatch } = useStore();
@@ -9,6 +10,7 @@ export default function HomeScreen() {
   const totalLevels = getTotalLevels();
   const continueLevel = Math.min(player.currentLevel || 1, totalLevels);
   const completedCount = Object.values(player.levelProgress || {}).filter((p) => p.completed).length;
+  const totalStars = Object.values(player.levelProgress || {}).reduce((sum, p) => sum + (p.stars || 0), 0);
 
   return (
     <div className="landing-page">
@@ -98,12 +100,32 @@ export default function HomeScreen() {
                 <div className="card-sub">Get Free Coins</div>
               </div>
             </button>
+
+            {/* Leaderboard */}
+            <button
+              onClick={() => dispatch({ type: 'SET_MODAL', modal: 'leaderboard' })}
+              className="landing-menu-card"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-10 h-10 rounded-xl bg-[#faf5ff] flex items-center justify-center text-[#9333ea]">
+                  <Trophy size={20} strokeWidth={2.5} />
+                </div>
+                <ChevronRight size={16} className="text-[#cbd5e1]" />
+              </div>
+              <div>
+                <div className="card-title">Leaderboard</div>
+                <div className="card-sub">{totalStars} ★ earned</div>
+              </div>
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Bottom Spacer (Demo section omitted as requested) */}
-      <div className="h-6" />
+      {/* Monetization: Bottom Banner Ad */}
+      <BannerAd className="mt-3 shrink-0" />
+
+      {/* Bottom Spacer */}
+      <div className="h-4 shrink-0" />
     </div>
   );
 }

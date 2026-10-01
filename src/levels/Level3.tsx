@@ -100,7 +100,7 @@ interface ArrowRuntime {
 }
 
 export default function Level3() {
-  const { dispatch } = useStore();
+  const { dispatch, showRewardedAd } = useStore();
   const appRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const arrowsRef = useRef<Record<string, ArrowRuntime>>({});
@@ -414,6 +414,39 @@ export default function Level3() {
     };
   }, [buildBoard]);
 
+  const handleHint = () => {
+    const freeArrow = ARROWS.find((def) => {
+      const a = arrowsRef.current[def.id];
+      if (!a || a.gone) return false;
+      return checkExitRay(def).clear;
+    });
+
+    if (!freeArrow) {
+      showToast('Level cleared');
+      return;
+    }
+
+    showRewardedAd({
+      rewardType: 'hint',
+      title: 'Free In-Game Hint',
+      rewardDescription: 'Reveals Next Solvable Arrow',
+      onReward: () => {
+        const a = arrowsRef.current[freeArrow.id];
+        if (a) {
+          a.g.animate(
+            [
+              { filter: 'drop-shadow(0 0 0 transparent)' },
+              { filter: 'drop-shadow(0 0 14px rgba(91,108,243,.9))' },
+              { filter: 'drop-shadow(0 0 0 transparent)' },
+            ],
+            { duration: 700, iterations: 2 }
+          );
+        }
+        showToast('Hint Revealed!');
+      },
+    });
+  };
+
   const handleRestart = () => {
     setIsWon(false);
     setHearts(3);
@@ -473,6 +506,21 @@ export default function Level3() {
           <svg id="boardSvg" ref={svgRef} className="lvl3-boardSvg" viewBox="-20 -20 118 144" />
         </div>
 
+        {/* Bottom Controls */}
+        <div className="lvl2-controls">
+          <button className="lvl2-round lvl2-hint" onClick={handleHint}>
+            <span className="lvl2-bulb">
+              <span className="lvl2-bolt">ϟ</span>
+            </span>
+            <span className="lvl2-ad">AD</span>
+          </button>
+          <button className="lvl2-round lvl2-calculator" onClick={() => showToast('Grid')}>
+            <span className="lvl2-calc-icon">
+              <i /><i /><i /><i /><i /><i /><i /><i /><i />
+            </span>
+          </button>
+        </div>
+
         {/* Win Modal */}
         <div className={`lvl3-win ${isWon ? 'on' : ''}`}>
           <div className="lvl3-win-card">
@@ -482,6 +530,38 @@ export default function Level3() {
             <div className="lvl3-stars">★ ★ ★</div>
             <button className="lvl3-next" onClick={handleNextLevel}>
               Next Level ➔
+            </button>
+            <button
+              onClick={() => {
+                showRewardedAd({
+                  rewardType: 'double_win',
+                  title: 'Double Level Coins',
+                  rewardDescription: '+40 Bonus Coins',
+                  onReward: () => {
+                    dispatch({ type: 'ADD_COINS', amount: 40 });
+                    showToast('+40 Bonus Coins Claimed!');
+                  },
+                });
+              }}
+              style={{
+                width: '100%',
+                height: 42,
+                borderRadius: 14,
+                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                color: '#fff',
+                fontWeight: 800,
+                fontSize: 13,
+                marginBottom: 8,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                cursor: 'pointer',
+                border: 'none',
+              }}
+            >
+              <span>🪙</span>
+              <span>Claim 2x Coins (Watch Ad)</span>
             </button>
             <button className="lvl3-replay" onClick={handleRestart}>
               ↺ Play Again

@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { ChevronLeft, Lock, CheckCircle } from 'lucide-react';
 import { useStore } from '../hooks/useStore';
 import { getTotalLevels } from '../game/levels';
+import BannerAd from './BannerAd';
 
 export default function LevelSelectScreen() {
   const { state, dispatch } = useStore();
@@ -120,6 +121,9 @@ export default function LevelSelectScreen() {
           })}
         </div>
       </div>
+
+      {/* Monetization: Bottom Banner Ad */}
+      <BannerAd className="my-2 shrink-0" />
     </div>
   );
 }
