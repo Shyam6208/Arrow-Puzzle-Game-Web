@@ -30,6 +30,7 @@ export type ArrowState = 'idle' | 'moving' | 'blocked' | 'removed';
 export interface ArrowRuntime {
   arrow: Arrow;
   state: ArrowState;
+  collided?: boolean;
 }
 
 // ─── Level definition ───

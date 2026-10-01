@@ -102,10 +102,14 @@ function reducer(state: StoreState, action: Action): StoreState {
           },
         };
       } else {
-        // Arrow is blocked - shake it, lose a life
-        const newLives = state.game.lives - 1;
+        // Arrow is blocked - collides and bounces back
+        // Exactly ONE heart is lost — but only on the FIRST collision per arrow
+        const alreadyCollided = arrowRuntime.collided;
+        const newLives = alreadyCollided ? state.game.lives : Math.max(0, state.game.lives - 1);
         const newArrows = state.game.arrows.map((a) =>
-          a.arrow.id === action.arrowId ? { ...a, state: 'blocked' as const } : a
+          a.arrow.id === action.arrowId
+            ? { ...a, state: 'blocked' as const, collided: true }
+            : a
         );
         return {
           ...state,

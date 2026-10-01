@@ -112,17 +112,22 @@ interface ArrowRuntime {
   head: SVGPathElement;
   dots: SVGGElement;
   gone: boolean;
+  collided: boolean;
+  animating: boolean;
 }
 
 export default function Level2() {
   const { state, dispatch } = useStore();
+  const appRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const arrowsRef = useRef<Record<string, ArrowRuntime>>({});
   const clearedRef = useRef(0);
+  const isInputLockedRef = useRef(false);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const toastTimerRef = useRef<number | null>(null);
 
   const [moves, setMoves] = useState(5);
+  const [hearts, setHearts] = useState(3);
   const [coins, setCoins] = useState(state.player.coins || 80);
   const [isWon, setIsWon] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
@@ -133,19 +138,24 @@ export default function Level2() {
     toastTimerRef.current = window.setTimeout(() => setToastMsg(null), 800);
   }, []);
 
+  const getAudioContext = () => {
+    const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!audioCtxRef.current && AudioCtx) {
+      audioCtxRef.current = new AudioCtx();
+    }
+    if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
+      audioCtxRef.current.resume();
+    }
+    return audioCtxRef.current;
+  };
+
   const playTapSound = () => {
     try {
-      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      if (!audioCtxRef.current && AudioCtx) {
-        audioCtxRef.current = new AudioCtx();
-      }
-      if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
-        audioCtxRef.current.resume();
-      }
-      if (!audioCtxRef.current) return;
-      const now = audioCtxRef.current.currentTime;
-      const o = audioCtxRef.current.createOscillator();
-      const g = audioCtxRef.current.createGain();
+      const ctx = getAudioContext();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
       o.type = 'sine';
       o.frequency.setValueAtTime(620, now);
       o.frequency.exponentialRampToValueAtTime(430, now + 0.055);
@@ -153,16 +163,85 @@ export default function Level2() {
       g.gain.exponentialRampToValueAtTime(0.14, now + 0.006);
       g.gain.exponentialRampToValueAtTime(0.0001, now + 0.075);
       o.connect(g);
-      g.connect(audioCtxRef.current.destination);
+      g.connect(ctx.destination);
       o.start(now);
       o.stop(now + 0.08);
     } catch {}
   };
 
+  const playCollisionSound = () => {
+    try {
+      const ctx = getAudioContext();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'triangle';
+      o.frequency.setValueAtTime(170, now);
+      o.frequency.exponentialRampToValueAtTime(65, now + 0.12);
+      g.gain.setValueAtTime(0.2, now);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
+      o.connect(g);
+      g.connect(ctx.destination);
+      o.start(now);
+      o.stop(now + 0.15);
+    } catch {}
+  };
+
+  const playFailSound = () => {
+    try {
+      const ctx = getAudioContext();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'sawtooth';
+      o.frequency.setValueAtTime(260, now);
+      o.frequency.exponentialRampToValueAtTime(95, now + 0.32);
+      g.gain.setValueAtTime(0.2, now);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+      o.connect(g);
+      g.connect(ctx.destination);
+      o.start(now);
+      o.stop(now + 0.36);
+    } catch {}
+  };
+
+  const checkExitRay = (def: ArrowDef): { clear: boolean; steps: number; obstacleId: string | null } => {
+    const headCell = def.cells[def.cells.length - 1];
+    const [ex, ey] = def.pts[def.pts.length - 1];
+    const [px, py] = def.pts[def.pts.length - 2];
+    const dl = Math.hypot(ex - px, ey - py) || 1;
+    const dc = Math.round((ex - px) / dl);
+    const dr = Math.round((ey - py) / dl);
+
+    let c = headCell[0] + dc;
+    let r = headCell[1] + dr;
+    let steps = 0;
+
+    // Grid bounds for Level 2: 0..4 on both axes
+    while (c >= 0 && c <= 4 && r >= 0 && r <= 4) {
+      steps++;
+      for (const otherDef of ARROWS) {
+        if (otherDef.id === def.id) continue;
+        const other = arrowsRef.current[otherDef.id];
+        if (!other || other.gone) continue;
+        const occupies = otherDef.cells.some(([oc, or]) => oc === c && or === r);
+        if (occupies) {
+          return { clear: false, steps, obstacleId: otherDef.id };
+        }
+      }
+      c += dc;
+      r += dr;
+    }
+    return { clear: true, steps, obstacleId: null };
+  };
+
   const remove = useCallback(
     (id: string) => {
       const a = arrowsRef.current[id];
-      if (!a || a.gone) return;
+      if (!a || a.gone || a.animating) return;
+      a.animating = true;
       a.gone = true;
       clearedRef.current++;
       setMoves((m) => Math.max(0, m - 1));
@@ -191,6 +270,7 @@ export default function Level2() {
         if (k < 1) {
           requestAnimationFrame(frame);
         } else {
+          a.animating = false;
           a.g.style.display = 'none';
           if (clearedRef.current === ARROWS.length) {
             window.setTimeout(() => {
@@ -211,51 +291,82 @@ export default function Level2() {
     [dispatch]
   );
 
-  const buildBoard = useCallback(() => {
-    const svg = svgRef.current;
-    if (!svg) return;
-    svg.innerHTML = '';
-    arrowsRef.current = {};
-    clearedRef.current = 0;
-    setMoves(5);
+  const bounce = useCallback(
+    (id: string, steps: number) => {
+      const a = arrowsRef.current[id];
+      if (!a || a.gone || a.animating) return;
+      a.animating = true;
 
-    ARROWS.forEach((def) => {
-      const path = makePath(def);
-      const dots = document.createElementNS(NS, 'g');
-      dots.setAttribute('class', 'lvl2-dots');
-      def.cells.forEach(([c, r]) => {
-        const [x, y] = P(c, r);
-        const d = document.createElementNS(NS, 'circle');
-        d.setAttribute('cx', String(x));
-        d.setAttribute('cy', String(y));
-        d.setAttribute('r', '2.4');
-        dots.appendChild(d);
-      });
-      svg.appendChild(dots);
+      playCollisionSound();
 
-      const g = document.createElementNS(NS, 'g');
-      g.setAttribute('class', 'lvl2-arrow pop');
-      const line = document.createElementNS(NS, 'polyline');
-      line.setAttribute('class', 'lvl2-pathline');
-      const head = document.createElementNS(NS, 'path');
-      head.setAttribute('class', 'lvl2-head');
-      head.setAttribute('d', 'M11 0 L-4 -7 L-4 7 Z');
-      g.appendChild(line);
-      g.appendChild(head);
-      svg.appendChild(g);
+      // App shake
+      if (appRef.current) {
+        appRef.current.classList.remove('shake');
+        // Force reflow
+        void appRef.current.offsetWidth;
+        appRef.current.classList.add('shake');
+        window.setTimeout(() => {
+          appRef.current?.classList.remove('shake');
+        }, 320);
+      }
 
-      const obj: ArrowRuntime = { def, path, g, line, head, dots, gone: false };
-      arrowsRef.current[def.id] = obj;
-      drawArrow(line, head, g, path, 0, 1);
+      // Heart deduction: ONLY on the FIRST collision per arrow
+      if (!a.collided) {
+        a.collided = true;
+        setHearts((curr) => {
+          const nextHearts = Math.max(0, curr - 1);
+          if (nextHearts === 0) {
+            // 3rd loss: lock input, show toast, and restart level
+            isInputLockedRef.current = true;
+            playFailSound();
+            showToast('Out of Lives!');
+            window.setTimeout(() => {
+              setIsWon(false);
+              setHearts(3);
+              buildBoard();
+              isInputLockedRef.current = false;
+            }, 1000);
+          }
+          return nextHearts;
+        });
+      }
 
-      g.addEventListener('pointerdown', (e) => {
-        e.preventDefault();
-        if (obj.gone) return;
-        playTapSound();
-        remove(def.id);
-      });
-    });
-  }, [remove]);
+      // Move forward to just before obstacle, then bounce back (~520ms total)
+      const maxDist = Math.max(10, Math.min(20, steps * CELL - 10));
+      const dur = 520;
+      let t0: number | null = null;
+
+      function frame(now: number) {
+        if (t0 === null) t0 = now;
+        const progress = Math.min(1, (now - t0) / dur);
+
+        let s = 0;
+        if (progress < 0.45) {
+          // Move forward (ease-out)
+          const k = progress / 0.45;
+          const easeOut = Math.sin((k * Math.PI) / 2);
+          s = easeOut * maxDist;
+        } else {
+          // Bounce back (ease-in)
+          const k = (progress - 0.45) / 0.55;
+          const easeIn = Math.cos((k * Math.PI) / 2);
+          s = easeIn * maxDist;
+        }
+
+        drawArrow(a.line, a.head, a.g, a.path, s, 1);
+
+        if (progress < 1) {
+          requestAnimationFrame(frame);
+        } else {
+          drawArrow(a.line, a.head, a.g, a.path, 0, 1);
+          a.animating = false;
+        }
+      }
+
+      requestAnimationFrame(frame);
+    },
+    [showToast]
+  );
 
   useEffect(() => {
     buildBoard();
@@ -283,6 +394,8 @@ export default function Level2() {
 
   const handleRestart = () => {
     setIsWon(false);
+    setHearts(3);
+    isInputLockedRef.current = false;
     buildBoard();
   };
 
@@ -301,7 +414,7 @@ export default function Level2() {
 
   return (
     <div className="lvl2-stage">
-      <div className="lvl2-app">
+      <div className="lvl2-app" ref={appRef}>
         {/* Header */}
         <header className="lvl2-topbar">
           <button className="lvl2-top-btn lvl2-back" onClick={handleHome} aria-label="Back">
@@ -317,7 +430,7 @@ export default function Level2() {
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round">
               <circle cx="12" cy="12" r="3" />
-              <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.9 1.9-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-2.68v-.08a1.7 1.7 0 0 0-1.04-1.56 1.7 1.7 0 0 0-1.88.34l-.06.06-1.9-1.9.06-.06A1.7 1.7 0 0 0 7.7 15a1.7 1.7 0 0 0-1.56-1.04H6v-2.68h.14A1.7 1.7 0 0 0 7.7 10.2a1.7 1.7 0 0 0-.34-1.88l-.06-.06 1.9-1.9.06.06a1.7 1.7 0 0 0 1.88.34 1.7 1.7 0 0 0 1.04-1.56V5h2.68v.2a1.7 1.7 0 0 0 1.04 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06 1.9 1.9-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.56 1.04H21v2.68h-.04A1.7 1.7 0 0 0 19.4 15z" />
+              <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.9 1.9-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-2.68v-.08a1.7 1.7 0 0 0-1.04-1.56 1.7 1.7 0 0 0-1.88.34l-.06.06-1.9-1.9.06-.06A1.7 1.7 0 0 0 7.7 15a1.7 1.7 0 0 0-1.56-1.04H6v-2.68h.14A1.7 1.7 0 0 0 7.7 10.2a1.7 1.7 0 0 0-.34-1.88l-.06-.06 1.9-1.9.06.06a1.7 1.7 0 0 0 1.88-.34 1.7 1.7 0 0 0 1.04-1.56V5h2.68v.2a1.7 1.7 0 0 0 1.04 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06 1.9 1.9-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.56 1.04H21v2.68h-.04A1.7 1.7 0 0 0 19.4 15z" />
             </svg>
           </button>
         </header>
@@ -329,21 +442,17 @@ export default function Level2() {
             <span id="moves">{moves}</span>
           </div>
           <div className="lvl2-hearts" aria-label="3 hearts">
-            <span className="lvl2-heart">
-              <svg viewBox="0 0 36 34">
-                <path d="M18 32.2C16.9 31.1 4.3 20.9 1.5 14.1-.9 8.2 2.4 2.4 8.2 1.2c3.8-.8 7.4.9 9.8 4.1 2.4-3.2 6-4.9 9.8-4.1 5.8 1.2 9.1 7 6.7 12.9C31.7 20.9 19.1 31.1 18 32.2Z" />
-              </svg>
-            </span>
-            <span className="lvl2-heart">
-              <svg viewBox="0 0 36 34">
-                <path d="M18 32.2C16.9 31.1 4.3 20.9 1.5 14.1-.9 8.2 2.4 2.4 8.2 1.2c3.8-.8 7.4.9 9.8 4.1 2.4-3.2 6-4.9 9.8-4.1 5.8 1.2 9.1 7 6.7 12.9C31.7 20.9 19.1 31.1 18 32.2Z" />
-              </svg>
-            </span>
-            <span className="lvl2-heart">
-              <svg viewBox="0 0 36 34">
-                <path d="M18 32.2C16.9 31.1 4.3 20.9 1.5 14.1-.9 8.2 2.4 2.4 8.2 1.2c3.8-.8 7.4.9 9.8 4.1 2.4-3.2 6-4.9 9.8-4.1 5.8 1.2 9.1 7 6.7 12.9C31.7 20.9 19.1 31.1 18 32.2Z" />
-              </svg>
-            </span>
+            {[0, 1, 2].map((idx) => (
+              <span
+                key={idx}
+                className={`lvl2-heart ${idx >= hearts ? 'lost' : ''}`}
+                aria-label={idx < hearts ? 'Active heart' : 'Lost heart'}
+              >
+                <svg viewBox="0 0 36 34">
+                  <path d="M18 32.2C16.9 31.1 4.3 20.9 1.5 14.1-.9 8.2 2.4 2.4 8.2 1.2c3.8-.8 7.4.9 9.8 4.1 2.4-3.2 6-4.9 9.8-4.1 5.8 1.2 9.1 7 6.7 12.9C31.7 20.9 19.1 31.1 18 32.2Z" />
+                </svg>
+              </span>
+            ))}
           </div>
           <div className="lvl2-pill">
             <span className="lvl2-coin">★</span>

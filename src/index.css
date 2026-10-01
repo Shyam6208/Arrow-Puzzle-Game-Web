@@ -356,6 +356,13 @@ body {
   height: 34px;
   display: block;
   flex: 0 0 36px;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease, filter 0.35s ease;
+}
+
+.lvl1-heart.lost {
+  opacity: 0.22;
+  transform: scale(0.76);
+  filter: grayscale(1);
 }
 
 .lvl1-heart svg {
@@ -808,6 +815,12 @@ body {
   width: 36px;
   height: 34px;
   display: block;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease, filter 0.35s ease;
+}
+.lvl2-heart.lost {
+  opacity: 0.22;
+  transform: scale(0.76);
+  filter: grayscale(1);
 }
 .lvl2-heart svg {
   width: 36px;
@@ -816,6 +829,21 @@ body {
 }
 .lvl2-heart path {
   fill: var(--heart);
+}
+
+@keyframes appShake {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(3px); }
+  100% { transform: translateX(0); }
+}
+
+.lvl1-app.shake,
+.lvl2-app.shake,
+#app.shake {
+  animation: appShake 0.32s cubic-bezier(.36,.07,.19,.97) both;
 }
 
 .lvl2-board-wrap {

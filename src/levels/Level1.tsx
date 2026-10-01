@@ -19,11 +19,14 @@ export default function Level1() {
   ]);
 
   const [moves, setMoves] = useState(3);
+  const [hearts, setHearts] = useState(3);
   const [coins, setCoins] = useState(state.player.coins || 65);
   const [cleared, setCleared] = useState(0);
   const [isWon, setIsWon] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
+  const isInputLockedRef = useRef(false);
+  const appRef = useRef<HTMLDivElement>(null);
   const toastTimerRef = useRef<number | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
 
@@ -67,6 +70,7 @@ export default function Level1() {
   };
 
   const clearArrow = (i: number) => {
+    if (isInputLockedRef.current) return;
     setArrows((prev) => {
       const target = prev[i];
       if (!target || target.gone || target.isFlying) return prev;
@@ -137,7 +141,9 @@ export default function Level1() {
   const handleRestart = () => {
     setIsWon(false);
     setMoves(3);
+    setHearts(3);
     setCleared(0);
+    isInputLockedRef.current = false;
     setArrows([
       { id: 0, isFlying: false, gone: false, hinting: false },
       { id: 1, isFlying: false, gone: false, hinting: false },
@@ -166,7 +172,7 @@ export default function Level1() {
 
   return (
     <div className="lvl1-stage">
-      <div className="lvl1-app">
+      <div className="lvl1-app" ref={appRef}>
         <section className="lvl1-game">
           {/* Top Bar */}
           <div className="lvl1-topbar">
@@ -185,7 +191,7 @@ export default function Level1() {
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round">
                 <circle cx="12" cy="12" r="3" />
-                <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.9 1.9-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-2.68v-.08a1.7 1.7 0 0 0-1.04-1.56 1.7 1.7 0 0 0-1.88.34l-.06.06-1.9-1.9.06-.06A1.7 1.7 0 0 0 7.7 15a1.7 1.7 0 0 0-1.56-1.04H6v-2.68h.14A1.7 1.7 0 0 0 7.7 10.2a1.7 1.7 0 0 0-.34-1.88l-.06-.06 1.9-1.9.06.06a1.7 1.7 0 0 0 1.88.34 1.7 1.7 0 0 0 1.04-1.56V5h2.68v.2a1.7 1.7 0 0 0 1.04 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06 1.9 1.9-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.56 1.04H21v2.68h-.04A1.7 1.7 0 0 0 19.4 15z" />
+                <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.9 1.9-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-2.68v-.08a1.7 1.7 0 0 0-1.04-1.56 1.7 1.7 0 0 0-1.88.34l-.06.06-1.9-1.9.06-.06A1.7 1.7 0 0 0 7.7 15a1.7 1.7 0 0 0-1.56-1.04H6v-2.68h.14A1.7 1.7 0 0 0 7.7 10.2a1.7 1.7 0 0 0-.34-1.88l-.06-.06 1.9-1.9.06.06a1.7 1.7 0 0 0 1.88-.34 1.7 1.7 0 0 0 1.04-1.56V5h2.68v.2a1.7 1.7 0 0 0 1.04 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06 1.9 1.9-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.56 1.04H21v2.68h-.04A1.7 1.7 0 0 0 19.4 15z" />
               </svg>
             </button>
           </div>
@@ -197,21 +203,17 @@ export default function Level1() {
               <span id="moves">{moves}</span>
             </div>
             <div className="lvl1-hearts" aria-label="3 hearts">
-              <span className="lvl1-heart">
-                <svg viewBox="0 0 36 34" aria-hidden="true">
-                  <path d="M18 32.2C16.9 31.1 4.3 20.9 1.5 14.1-.9 8.2 2.4 2.4 8.2 1.2c3.8-.8 7.4.9 9.8 4.1 2.4-3.2 6-4.9 9.8-4.1 5.8 1.2 9.1 7 6.7 12.9C31.7 20.9 19.1 31.1 18 32.2Z" />
-                </svg>
-              </span>
-              <span className="lvl1-heart">
-                <svg viewBox="0 0 36 34" aria-hidden="true">
-                  <path d="M18 32.2C16.9 31.1 4.3 20.9 1.5 14.1-.9 8.2 2.4 2.4 8.2 1.2c3.8-.8 7.4.9 9.8 4.1 2.4-3.2 6-4.9 9.8-4.1 5.8 1.2 9.1 7 6.7 12.9C31.7 20.9 19.1 31.1 18 32.2Z" />
-                </svg>
-              </span>
-              <span className="lvl1-heart">
-                <svg viewBox="0 0 36 34" aria-hidden="true">
-                  <path d="M18 32.2C16.9 31.1 4.3 20.9 1.5 14.1-.9 8.2 2.4 2.4 8.2 1.2c3.8-.8 7.4.9 9.8 4.1 2.4-3.2 6-4.9 9.8-4.1 5.8 1.2 9.1 7 6.7 12.9C31.7 20.9 19.1 31.1 18 32.2Z" />
-                </svg>
-              </span>
+              {[0, 1, 2].map((idx) => (
+                <span
+                  key={idx}
+                  className={`lvl1-heart ${idx >= hearts ? 'lost' : ''}`}
+                  aria-label={idx < hearts ? 'Active heart' : 'Lost heart'}
+                >
+                  <svg viewBox="0 0 36 34" aria-hidden="true">
+                    <path d="M18 32.2C16.9 31.1 4.3 20.9 1.5 14.1-.9 8.2 2.4 2.4 8.2 1.2c3.8-.8 7.4.9 9.8 4.1 2.4-3.2 6-4.9 9.8-4.1 5.8 1.2 9.1 7 6.7 12.9C31.7 20.9 19.1 31.1 18 32.2Z" />
+                  </svg>
+                </span>
+              ))}
             </div>
             <div className="lvl1-pill">
               <span className="lvl1-coin">★</span>
