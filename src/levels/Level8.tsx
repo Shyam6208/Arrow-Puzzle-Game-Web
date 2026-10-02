@@ -134,10 +134,12 @@ function drawArrow(
   g: SVGGElement,
   path: PathInfo,
   s: number,
-  op: number
+  op: number,
+  hitArea?: SVGPolylineElement
 ) {
   const shape = pulledShape(path, s);
   line.setAttribute('points', shape.map((p) => `${p[0].toFixed(2)},${p[1].toFixed(2)}`).join(' '));
+  if (hitArea) hitArea.setAttribute('points', line.getAttribute('points')!);
   const [hx, hy] = pointAt(path, path.L + s);
   const ang = (Math.atan2(path.dir[1], path.dir[0]) * 180) / Math.PI;
   head.setAttribute('transform', `translate(${hx.toFixed(2)},${hy.toFixed(2)}) rotate(${ang.toFixed(2)})`);
@@ -169,6 +171,7 @@ interface ArrowRuntime {
   path: PathInfo;
   g: SVGGElement;
   line: SVGPolylineElement;
+  hitArea: SVGPolylineElement;
   head: SVGPathElement;
   dots: SVGGElement;
   gone: boolean;
@@ -340,7 +343,7 @@ export default function Level8() {
         const e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
         const s = e * dist;
         const op = k > 0.72 ? Math.max(0, 1 - (k - 0.72) / 0.28) : 1;
-        drawArrow(a.line, a.head, a.g, a.path, s, op);
+        drawArrow(a.line, a.head, a.g, a.path, s, op, a.hitArea);
 
         if (!dotsShown && s >= L) {
           dotsShown = true;
@@ -414,12 +417,12 @@ export default function Level8() {
         const k = Math.min(1, (now - start) / dur);
         const e = k < 0.5 ? 1 - Math.pow(1 - 2 * k, 2) : Math.pow(2 - 2 * k, 2);
 
-        drawArrow(a.line, a.head, a.g, a.path, bump * e, 1);
+        drawArrow(a.line, a.head, a.g, a.path, bump * e, 1, a.hitArea);
 
         if (k < 1) {
           requestAnimationFrame(fr);
         } else {
-          drawArrow(a.line, a.head, a.g, a.path, 0, 1);
+          drawArrow(a.line, a.head, a.g, a.path, 0, 1, a.hitArea);
           a.busy = false;
           a.g.classList.remove('hit');
         }
@@ -477,6 +480,13 @@ export default function Level8() {
       // Fixed, slim head for every arrow; path thickness is fixed as well
       head.setAttribute('d', 'M7.5 0 L-3.5 -5 L-3.5 5 Z');
 
+      // Wide invisible hit area for reliable mobile taps
+      const hitArea = document.createElementNS(NS, 'polyline');
+      hitArea.setAttribute('stroke', 'transparent');
+      hitArea.setAttribute('stroke-width', '28');
+      hitArea.setAttribute('fill', 'none');
+      hitArea.setAttribute('pointer-events', 'stroke');
+      g.appendChild(hitArea);
       g.appendChild(line);
       g.appendChild(head);
       svg.appendChild(g);
@@ -486,6 +496,7 @@ export default function Level8() {
         path,
         g,
         line,
+        hitArea,
         head,
         dots,
         gone: false,
@@ -494,7 +505,7 @@ export default function Level8() {
       };
 
       arrowsRef.current[def.id] = runtime;
-      drawArrow(line, head, g, path, 0, 1);
+      drawArrow(line, head, g, path, 0, 1, hitArea);
 
       g.addEventListener('pointerdown', (e) => {
         e.preventDefault();

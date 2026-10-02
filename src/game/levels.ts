@@ -153,9 +153,9 @@ const level8: LevelData = {
 
 const level9: LevelData = {
   id: 9,
-  gridRows: 9,
-  gridCols: 9,
-  par: 8,
+  gridRows: 23,
+  gridCols: 18,
+  par: 54,
   difficulty: 6,
   arrows: [
     makeArrow([{ row: 0, col: 4 }, { row: 1, col: 4 }, { row: 2, col: 4 }], 'down'),
@@ -171,9 +171,9 @@ const level9: LevelData = {
 
 const level10: LevelData = {
   id: 10,
-  gridRows: 10,
-  gridCols: 10,
-  par: 9,
+  gridRows: 23,
+  gridCols: 22,
+  par: 43,
   difficulty: 7,
   arrows: [
     makeArrow([{ row: 1, col: 1 }, { row: 1, col: 2 }, { row: 1, col: 3 }, { row: 1, col: 4 }], 'right'),

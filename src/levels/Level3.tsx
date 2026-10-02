@@ -76,10 +76,12 @@ function drawArrow(
   g: SVGGElement,
   path: PathInfo,
   s: number,
-  op: number
+  op: number,
+  hitArea?: SVGPolylineElement
 ) {
   const shape = pulledShape(path, s);
   line.setAttribute('points', shape.map((p) => p[0].toFixed(2) + ',' + p[1].toFixed(2)).join(' '));
+  if (hitArea) hitArea.setAttribute('points', line.getAttribute('points')!);
   const [hx, hy] = pointAt(path, path.L + s);
   const ang = (Math.atan2(path.dir[1], path.dir[0]) * 180) / Math.PI;
   head.setAttribute('transform', `translate(${hx.toFixed(2)},${hy.toFixed(2)}) rotate(${ang.toFixed(2)})`);
@@ -91,6 +93,7 @@ interface ArrowRuntime {
   path: PathInfo;
   g: SVGGElement;
   line: SVGPolylineElement;
+  hitArea: SVGPolylineElement;
   head: SVGPathElement;
   dots: SVGGElement;
   gone: boolean;
@@ -240,7 +243,7 @@ export default function Level3() {
         const e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
         const s = e * dist;
         const op = k > 0.72 ? Math.max(0, 1 - (k - 0.72) / 0.28) : 1;
-        drawArrow(a.line, a.head, a.g, a.path, s, op);
+        drawArrow(a.line, a.head, a.g, a.path, s, op, a.hitArea);
 
         if (!dotsShown && s >= L) {
           dotsShown = true;
@@ -330,12 +333,12 @@ export default function Level3() {
           s = easeIn * maxDist;
         }
 
-        drawArrow(a.line, a.head, a.g, a.path, s, 1);
+        drawArrow(a.line, a.head, a.g, a.path, s, 1, a.hitArea);
 
         if (progress < 1) {
           requestAnimationFrame(frame);
         } else {
-          drawArrow(a.line, a.head, a.g, a.path, 0, 1);
+          drawArrow(a.line, a.head, a.g, a.path, 0, 1, a.hitArea);
           a.animating = false;
         }
       }
@@ -373,6 +376,13 @@ export default function Level3() {
       const head = document.createElementNS(NS, 'path');
       head.setAttribute('class', 'lvl3-head');
       head.setAttribute('d', 'M11 0 L-4 -7 L-4 7 Z');
+      // Wide invisible hit area for reliable mobile taps
+      const hitArea = document.createElementNS(NS, 'polyline');
+      hitArea.setAttribute('stroke', 'transparent');
+      hitArea.setAttribute('stroke-width', '28');
+      hitArea.setAttribute('fill', 'none');
+      hitArea.setAttribute('pointer-events', 'stroke');
+      g.appendChild(hitArea);
       g.appendChild(line);
       g.appendChild(head);
       svg.appendChild(g);
@@ -382,6 +392,7 @@ export default function Level3() {
         path,
         g,
         line,
+        hitArea,
         head,
         dots,
         gone: false,
@@ -389,7 +400,7 @@ export default function Level3() {
         animating: false,
       };
       arrowsRef.current[def.id] = obj;
-      drawArrow(line, head, g, path, 0, 1);
+      drawArrow(line, head, g, path, 0, 1, hitArea);
 
       g.addEventListener('pointerdown', (e) => {
         e.preventDefault();
