@@ -64,8 +64,8 @@ export default function LevelSelectScreen() {
           {Array.from({ length: totalLevels }, (_, i) => {
             const levelId = i + 1;
             const progress = player.levelProgress[levelId];
-            // Unlocked if previous completed or level 1, or within player currentLevel
-            const isUnlocked = levelId <= Math.max(player.currentLevel || 1, 1);
+            // All levels are unlocked and enabled
+            const isUnlocked = true;
             const isCompleted = progress?.completed;
             const stars = progress?.stars || 0;
 

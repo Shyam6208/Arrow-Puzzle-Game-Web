@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { StoreProvider, useStore } from './hooks/useStore';
 import HomeScreen from './components/HomeScreen';
@@ -7,7 +8,18 @@ import Modals from './components/Modals';
 import RewardedAdModal from './components/RewardedAdModal';
 
 function AppContent() {
-  const { state, closeRewardedAd } = useStore();
+  const { state, dispatch, closeRewardedAd } = useStore();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const lvlParam = params.get('level');
+    if (lvlParam) {
+      const parsed = parseInt(lvlParam, 10);
+      if (!isNaN(parsed) && parsed >= 1) {
+        dispatch({ type: 'START_LEVEL', levelId: parsed });
+      }
+    }
+  }, [dispatch]);
 
   return (
     <div className="w-full h-full min-h-screen bg-[#edf2f7] flex flex-col font-sans">

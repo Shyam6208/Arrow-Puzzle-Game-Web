@@ -23,7 +23,7 @@ const defaultSettings: GameSettings = {
 
 const defaultPlayer: PlayerProfile = {
   coins: 80,
-  currentLevel: 1,
+  currentLevel: 16,
   levelProgress: {},
   settings: defaultSettings,
 };
@@ -33,10 +33,15 @@ function loadPlayer(): PlayerProfile {
     const saved = localStorage.getItem('arrow-puzzle-player');
     if (saved) {
       const parsed = JSON.parse(saved);
-      return { ...defaultPlayer, ...parsed, settings: { ...defaultSettings, ...parsed.settings } };
+      return {
+        ...defaultPlayer,
+        ...parsed,
+        currentLevel: Math.max(parsed.currentLevel || 1, getTotalLevels()),
+        settings: { ...defaultSettings, ...parsed.settings },
+      };
     }
   } catch { /* ignore */ }
-  return defaultPlayer;
+  return { ...defaultPlayer, currentLevel: getTotalLevels() };
 }
 
 function savePlayer(player: PlayerProfile) {

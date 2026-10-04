@@ -643,8 +643,7 @@ export default function Level10() {
 
   const handleNextLevel = () => {
     setIsWon(false);
-    // Level 10 is the final designed level; send player to Level Select screen
-    dispatch({ type: 'SET_SCREEN', screen: 'levels' });
+    dispatch({ type: 'START_LEVEL', levelId: 11 });
   };
 
   const handleHome = () => {
@@ -740,7 +739,7 @@ export default function Level10() {
             <div className="lvl10-trophy">🏆</div>
             <div className="lvl10-stars">★ ★ ★</div>
             <button className="lvl10-next" onClick={handleNextLevel}>
-              Level Select ➔
+              Next Level ➔
             </button>
             <button className="lvl10-replay" onClick={handleRestart}>
               ↺ Play Again
