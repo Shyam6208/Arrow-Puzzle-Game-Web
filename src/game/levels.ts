@@ -510,6 +510,15 @@ const level25: LevelData = {
   arrows: [], // Handled by custom component Level25.tsx
 };
 
+const level26: LevelData = {
+  id: 26,
+  gridRows: 33,
+  gridCols: 27,
+  par: 75,
+  difficulty: 10,
+  arrows: [], // Handled by custom component Level26.tsx
+};
+
 export const ALL_LEVELS: LevelData[] = [
   level1,
   level2,
@@ -536,6 +545,7 @@ export const ALL_LEVELS: LevelData[] = [
   level23,
   level24,
   level25,
+  level26,
 ];
 
 export function getLevelById(id: number): LevelData | undefined {
