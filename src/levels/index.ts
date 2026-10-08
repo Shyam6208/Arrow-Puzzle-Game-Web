@@ -21,8 +21,9 @@ import Level21 from './Level21';
 import Level22 from './Level22';
 import Level23 from './Level23';
 import Level24 from './Level24';
+import Level25 from './Level25';
 
-export { Level1, Level2, Level3, Level4, Level5, Level6, Level7, Level8, Level9, Level10, Level11, Level12, Level14, Level15, Level16, Level18, Level19, Level20, Level21, Level22, Level23, Level24 };
+export { Level1, Level2, Level3, Level4, Level5, Level6, Level7, Level8, Level9, Level10, Level11, Level12, Level14, Level15, Level16, Level18, Level19, Level20, Level21, Level22, Level23, Level24, Level25 };
 
 // Helper to get custom level component if available
 export const LEVEL_COMPONENTS: Record<number, React.ComponentType> = {
@@ -48,6 +49,7 @@ export const LEVEL_COMPONENTS: Record<number, React.ComponentType> = {
   22: Level22,
   23: Level23,
   24: Level24,
+  25: Level25,
 };
 
 export function getCustomLevel(levelId: number): React.ComponentType | null {
