@@ -519,6 +519,51 @@ const level26: LevelData = {
   arrows: [], // Handled by custom component Level26.tsx
 };
 
+const level27: LevelData = {
+  id: 27,
+  gridRows: 19,
+  gridCols: 17,
+  par: 62,
+  difficulty: 10,
+  arrows: [], // Handled by custom component Level27.tsx
+};
+
+const level28: LevelData = {
+  id: 28,
+  gridRows: 22,
+  gridCols: 16,
+  par: 35,
+  difficulty: 10,
+  arrows: [], // Handled by custom component Level28.tsx
+};
+
+const level29: LevelData = {
+  id: 29,
+  gridRows: 27,
+  gridCols: 21,
+  par: 88,
+  difficulty: 10,
+  arrows: [], // Handled by custom component Level29.tsx
+};
+
+const level30: LevelData = {
+  id: 30,
+  gridRows: 41,
+  gridCols: 35,
+  par: 63,
+  difficulty: 10,
+  arrows: [], // Handled by custom component Level30.tsx
+};
+
+const level31: LevelData = {
+  id: 31,
+  gridRows: 33,
+  gridCols: 25,
+  par: 74,
+  difficulty: 10,
+  arrows: [], // Handled by custom component Level31.tsx
+};
+
 export const ALL_LEVELS: LevelData[] = [
   level1,
   level2,
@@ -546,6 +591,11 @@ export const ALL_LEVELS: LevelData[] = [
   level24,
   level25,
   level26,
+  level27,
+  level28,
+  level29,
+  level30,
+  level31,
 ];
 
 export function getLevelById(id: number): LevelData | undefined {

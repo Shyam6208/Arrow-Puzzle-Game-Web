@@ -76,7 +76,7 @@ export const GAME = {
   coinsForExtraLife: 20,
   coinsForSkip: 50,
   coinsForUndo: 15,
-  totalLevels: 10,
+  totalLevels: 31,
   // Stars calculation:
   // 3 stars = within par moves
   // 2 stars = par + 1 or 2 extra
