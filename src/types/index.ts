@@ -61,6 +61,7 @@ export interface GameState {
   arrows: ArrowRuntime[];
   moves: number;
   lives: number;
+  hearts?: number;
   maxLives: number;
   isComplete: boolean;
   isFailed: boolean;

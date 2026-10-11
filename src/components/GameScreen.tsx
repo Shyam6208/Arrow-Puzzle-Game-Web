@@ -11,7 +11,6 @@ export default function GameScreen() {
   const game = state.game;
   const {
     zoomLevel,
-    panOffset,
     isPanMode,
     togglePanMode,
     isPanned,
@@ -121,7 +120,7 @@ export default function GameScreen() {
 
             {/* Lives */}
             <div className="flex items-center gap-1">
-              {[0, 1, 2].map((i) => renderHeart(i < game.hearts, i))}
+              {[0, 1, 2].map((i) => renderHeart(i < (game.hearts ?? game.lives), i))}
             </div>
 
             {/* Coins */}

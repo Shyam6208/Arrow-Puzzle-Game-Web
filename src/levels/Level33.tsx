@@ -110,7 +110,6 @@ export default function Level33() {
   const { state, dispatch, showRewardedAd } = useStore();
   const {
     zoomLevel,
-    panOffset,
     isPanMode,
     togglePanMode,
     isPanned,
@@ -667,11 +666,6 @@ export default function Level33() {
   const handleLevelSelect = () => {
     setIsWon(false);
     dispatch({ type: 'SET_SCREEN', screen: 'levels' });
-  };
-
-  const handleNextLevel = () => {
-    setIsWon(false);
-    dispatch({ type: 'START_LEVEL', levelId: 34 });
   };
 
   const handleHome = () => {
