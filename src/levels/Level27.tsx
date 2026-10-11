@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useStore } from '../hooks/useStore';
+import { useZoom } from '../hooks/useZoom';
+import ZoomControls from '../components/ZoomControls';
 
 const NS = 'http://www.w3.org/2000/svg';
 const CELL = 22;
@@ -207,6 +209,7 @@ interface ArrowRuntime {
 
 export default function Level27() {
   const { state, dispatch, showRewardedAd } = useStore();
+  const { zoomLevel, panOffset, isPanMode, togglePanMode, isPanned, zoomIn, zoomOut, resetZoom, canZoomIn, canZoomOut, isZoomed, boardRef, boardStyle } = useZoom();
   const currentLevelId = state.game?.levelId || 27;
 
   const appRef = useRef<HTMLDivElement>(null);
@@ -751,12 +754,23 @@ export default function Level27() {
         </header>
 
         {/* Board Wrap */}
-        <div id="board-wrap" className="lvl27-board-wrap">
+        <div id="board-wrap" className="lvl27-board-wrap" ref={boardRef} style={boardStyle}>
           <svg id="boardSvg" ref={svgRef} className="lvl27-boardSvg" viewBox="-20 -20 414 458" />
         </div>
 
         {/* Controls */}
         <div className="lvl27-controls">
+          <ZoomControls
+            zoomLevel={zoomLevel}
+            onZoomIn={zoomIn}
+            onZoomOut={zoomOut}
+            onReset={resetZoom}
+            canZoomIn={canZoomIn}
+            canZoomOut={canZoomOut}
+            isPanMode={isPanMode}
+            onTogglePanMode={togglePanMode}
+            isPanned={isPanned}
+          />
           <button className="lvl27-round lvl27-hint" onClick={handleHint} aria-label="Hint">
             <span className="lvl27-bulb">
               <span className="lvl27-bolt">ϟ</span>

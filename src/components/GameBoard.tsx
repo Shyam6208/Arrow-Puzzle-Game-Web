@@ -3,7 +3,13 @@ import { useStore } from '../hooks/useStore';
 import { getLevelById } from '../game/levels';
 import ArrowComponent from './Arrow';
 
-export default function GameBoard() {
+interface GameBoardProps {
+  boardRef?: React.RefObject<HTMLDivElement | null>;
+  boardStyle?: React.CSSProperties;
+  isPanMode?: boolean;
+}
+
+export default function GameBoard({ boardRef, boardStyle, isPanMode }: GameBoardProps) {
   const { state, dispatch } = useStore();
   const containerRef = useRef<HTMLDivElement>(null);
   const [cellSize, setCellSize] = useState(80);
@@ -42,11 +48,12 @@ export default function GameBoard() {
   }, [game]);
 
   const handleTap = useCallback((id: string) => {
+    if (isPanMode) return; // Prevent tapping arrows when in pan/move mode
     dispatch({ type: 'TAP_ARROW', arrowId: id });
     setShowTapGrid(true);
     if (tapGridTimer.current) clearTimeout(tapGridTimer.current);
     tapGridTimer.current = setTimeout(() => setShowTapGrid(false), 500);
-  }, [dispatch]);
+  }, [dispatch, isPanMode]);
 
   if (!game || !level) return null;
 
@@ -55,59 +62,73 @@ export default function GameBoard() {
   const showGrid = state.player.settings.showGrid || showTapGrid;
 
   return (
-    <div ref={containerRef} className="flex-1 flex items-center justify-center overflow-hidden">
-      <div className="relative" style={{ width: boardWidth, height: boardHeight }}>
+    <div
+      ref={containerRef}
+      className="flex-1 flex items-center justify-center overflow-hidden"
+      style={{ position: 'relative', width: '100%', height: '100%' }}
+    >
+      <div
+        ref={boardRef}
+        className="zoom-board-wrapper"
+        style={{
+          ...boardStyle,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <div className="relative" style={{ width: boardWidth, height: boardHeight }}>
+          {/* Dots for empty cells */}
+          {Array.from({ length: gridRows }, (_, row) =>
+            Array.from({ length: gridCols }, (_, col) => {
+              if (occupiedCells.has(`${row},${col}`)) return null;
+              const cx = col * cellSize + cellSize / 2;
+              const cy = row * cellSize + cellSize / 2;
+              return (
+                <div
+                  key={`dot-${row}-${col}`}
+                  className="absolute rounded-full"
+                  style={{ width: 10, height: 10, background: '#c8d3e0', left: cx - 5, top: cy - 5 }}
+                />
+              );
+            })
+          )}
 
-        {/* Dots for empty cells */}
-        {Array.from({ length: gridRows }, (_, row) =>
-          Array.from({ length: gridCols }, (_, col) => {
-            if (occupiedCells.has(`${row},${col}`)) return null;
-            const cx = col * cellSize + cellSize / 2;
-            const cy = row * cellSize + cellSize / 2;
-            return (
-              <div
-                key={`dot-${row}-${col}`}
-                className="absolute rounded-full"
-                style={{ width: 10, height: 10, background: '#c8d3e0', left: cx - 5, top: cy - 5 }}
-              />
-            );
-          })
-        )}
+          {/* Grid lines — flash on tap, always on if setting enabled */}
+          {showGrid && (
+            <svg
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                width: boardWidth,
+                height: boardHeight,
+                transition: 'opacity 0.3s',
+                opacity: showTapGrid && !state.player.settings.showGrid ? 0.55 : 1,
+              }}
+            >
+              {Array.from({ length: gridCols + 1 }, (_, i) => (
+                <line key={`v-${i}`} x1={i * cellSize} y1={0} x2={i * cellSize} y2={boardHeight} stroke="#94a3b8" strokeWidth={1} opacity={0.5} />
+              ))}
+              {Array.from({ length: gridRows + 1 }, (_, i) => (
+                <line key={`h-${i}`} x1={0} y1={i * cellSize} x2={boardWidth} y2={i * cellSize} stroke="#94a3b8" strokeWidth={1} opacity={0.5} />
+              ))}
+            </svg>
+          )}
 
-        {/* Grid lines — flash on tap, always on if setting enabled */}
-        {showGrid && (
-          <svg
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              width: boardWidth,
-              height: boardHeight,
-              transition: 'opacity 0.3s',
-              opacity: showTapGrid && !state.player.settings.showGrid ? 0.55 : 1,
-            }}
-          >
-            {Array.from({ length: gridCols + 1 }, (_, i) => (
-              <line key={`v-${i}`} x1={i * cellSize} y1={0} x2={i * cellSize} y2={boardHeight} stroke="#94a3b8" strokeWidth={1} opacity={0.5} />
-            ))}
-            {Array.from({ length: gridRows + 1 }, (_, i) => (
-              <line key={`h-${i}`} x1={0} y1={i * cellSize} x2={boardWidth} y2={i * cellSize} stroke="#94a3b8" strokeWidth={1} opacity={0.5} />
-            ))}
-          </svg>
-        )}
-
-        {/* Arrows */}
-        {game.arrows.map((ar) => (
-          <ArrowComponent
-            key={ar.arrow.id}
-            arrow={ar.arrow}
-            state={ar.state}
-            cellSize={cellSize}
-            gridRows={gridRows}
-            gridCols={gridCols}
-            onTap={handleTap}
-            onMoved={(id) => dispatch({ type: 'ARROW_MOVED', arrowId: id })}
-            onShakeDone={(id) => dispatch({ type: 'ARROW_SHAKE_DONE', arrowId: id })}
-          />
-        ))}
+          {/* Arrows */}
+          {game.arrows.map((ar) => (
+            <ArrowComponent
+              key={ar.arrow.id}
+              arrow={ar.arrow}
+              state={ar.state}
+              cellSize={cellSize}
+              gridRows={gridRows}
+              gridCols={gridCols}
+              onTap={handleTap}
+              onMoved={(id) => dispatch({ type: 'ARROW_MOVED', arrowId: id })}
+              onShakeDone={(id) => dispatch({ type: 'ARROW_SHAKE_DONE', arrowId: id })}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

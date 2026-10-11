@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useStore } from '../hooks/useStore';
+import { useZoom } from '../hooks/useZoom';
+import ZoomControls from '../components/ZoomControls';
 
 const COLS = [{ x: -54 }, { x: 0 }, { x: 54 }];
 
@@ -12,6 +14,7 @@ interface ArrowItem {
 
 export default function Level1() {
   const { state, dispatch, showRewardedAd } = useStore();
+  const { zoomLevel, panOffset, isPanMode, togglePanMode, isPanned, zoomIn, zoomOut, resetZoom, canZoomIn, canZoomOut, isZoomed, boardRef, boardStyle } = useZoom();
   const [arrows, setArrows] = useState<ArrowItem[]>([
     { id: 0, isFlying: false, gone: false, hinting: false },
     { id: 1, isFlying: false, gone: false, hinting: false },
@@ -245,7 +248,7 @@ export default function Level1() {
           </div>
 
           {/* Board */}
-          <div className="lvl1-board">
+          <div className="lvl1-board" ref={boardRef} style={boardStyle}>
             {COLS.map((col, i) => {
               const arrow = arrows[i];
               return (
@@ -279,6 +282,17 @@ export default function Level1() {
 
           {/* Bottom Controls */}
           <div className="lvl1-controls">
+          <ZoomControls
+            zoomLevel={zoomLevel}
+            onZoomIn={zoomIn}
+            onZoomOut={zoomOut}
+            onReset={resetZoom}
+            canZoomIn={canZoomIn}
+            canZoomOut={canZoomOut}
+            isPanMode={isPanMode}
+            onTogglePanMode={togglePanMode}
+            isPanned={isPanned}
+          />
             <button className="lvl1-circle lvl1-hint" onClick={handleHint}>
               <span className="lvl1-bulb">
                 <span className="lvl1-bolt">ϟ</span>

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useStore } from '../hooks/useStore';
+import { useZoom } from '../hooks/useZoom';
+import ZoomControls from '../components/ZoomControls';
 
 const NS = 'http://www.w3.org/2000/svg';
 const CELL = 24;
@@ -172,6 +174,7 @@ interface ArrowRuntime {
 
 export default function Level7() {
   const { dispatch, showRewardedAd } = useStore();
+  const { zoomLevel, panOffset, isPanMode, togglePanMode, isPanned, zoomIn, zoomOut, resetZoom, canZoomIn, canZoomOut, isZoomed, boardRef, boardStyle } = useZoom();
   const [mistakes, setMistakes] = useState(0);
   const [isWon, setIsWon] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
@@ -646,12 +649,23 @@ export default function Level7() {
         </header>
 
         {/* Board Wrap */}
-        <div id="board-wrap" className="lvl7-board-wrap">
+        <div id="board-wrap" className="lvl7-board-wrap" ref={boardRef} style={boardStyle}>
           <svg id="boardSvg" ref={svgRef} className="lvl7-boardSvg" viewBox="-20 -20 328 400" />
         </div>
 
         {/* Controls */}
         <div className="lvl7-controls">
+          <ZoomControls
+            zoomLevel={zoomLevel}
+            onZoomIn={zoomIn}
+            onZoomOut={zoomOut}
+            onReset={resetZoom}
+            canZoomIn={canZoomIn}
+            canZoomOut={canZoomOut}
+            isPanMode={isPanMode}
+            onTogglePanMode={togglePanMode}
+            isPanned={isPanned}
+          />
           <button className="lvl7-round lvl7-hint" onClick={handleHint} aria-label="Hint">
             <span className="lvl7-bulb">
               <span className="lvl7-bolt">ϟ</span>

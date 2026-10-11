@@ -1,12 +1,33 @@
 import { useEffect } from 'react';
 import { ChevronLeft, Settings, Lightbulb, Grid3x3 } from 'lucide-react';
 import { useStore } from '../hooks/useStore';
+import { useZoom } from '../hooks/useZoom';
 import GameBoard from './GameBoard';
+import ZoomControls from './ZoomControls';
 import { LEVEL_COMPONENTS } from '../levels';
 
 export default function GameScreen() {
   const { state, dispatch, findHintArrow, showRewardedAd } = useStore();
   const game = state.game;
+  const {
+    zoomLevel,
+    panOffset,
+    isPanMode,
+    togglePanMode,
+    isPanned,
+    zoomIn,
+    zoomOut,
+    resetZoom,
+    canZoomIn,
+    canZoomOut,
+    boardRef,
+    boardStyle,
+  } = useZoom();
+
+  // Reset zoom & pan when level changes
+  useEffect(() => {
+    resetZoom();
+  }, [game?.levelId, resetZoom]);
 
   useEffect(() => {
     const onUseHint = () => {
@@ -78,28 +99,32 @@ export default function GameScreen() {
             >
               <ChevronLeft size={24} strokeWidth={2.5} className="text-[var(--navy)]" />
             </button>
-            <h1 className="text-xl font-black text-[var(--navy)]">Level {game.levelId}</h1>
+            <h1 className="text-xl font-black text-[var(--navy)] tracking-wide">
+              Level {game.levelId}
+            </h1>
             <button
               onClick={openSettings}
               className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/5 active:scale-95 transition-all cursor-pointer"
             >
-              <Settings size={20} className="text-[var(--gray)]" />
+              <Settings size={22} className="text-[var(--navy-soft)]" />
             </button>
           </div>
 
           {/* Stats Bar */}
-          <div className="flex items-center justify-between px-2 pt-2">
+          <div className="flex items-center justify-between mt-2 px-2">
+            {/* Moves Remaining */}
             <div className="flex items-center gap-1.5 text-sm font-extrabold text-[var(--navy-soft)]">
-              <span>↗</span>
-              <span>{remainingArrows}</span>
+              <span>Moves:</span>
+              <span className="text-[var(--indigo)] font-black text-base">{game.moves}</span>
+              <span className="text-xs text-gray-400">({remainingArrows} left)</span>
             </div>
 
-            <div className="flex items-center gap-1.5">
-              {Array.from({ length: game.maxLives }, (_, i) =>
-                renderHeart(i < game.lives, i)
-              )}
+            {/* Lives */}
+            <div className="flex items-center gap-1">
+              {[0, 1, 2].map((i) => renderHeart(i < game.hearts, i))}
             </div>
 
+            {/* Coins */}
             <button
               onClick={() => dispatch({ type: 'SET_MODAL', modal: 'coin-shop' })}
               className="flex items-center gap-1.5 text-sm font-extrabold text-[var(--navy-soft)] hover:opacity-80 active:scale-95 cursor-pointer bg-white/60 px-2 py-0.5 rounded-full"
@@ -112,10 +137,30 @@ export default function GameScreen() {
         </div>
 
         {/* Main Board Content for grid levels */}
-        <GameBoard />
+        <GameBoard
+          boardRef={boardRef}
+          boardStyle={boardStyle}
+          isPanMode={isPanMode}
+        />
 
         {/* Bottom Bar for grid levels */}
-        <div className="flex items-center justify-center gap-4 pb-6 pt-2 z-10">
+        <div className="flex items-center justify-center gap-3 pb-6 pt-2 z-10">
+          <ZoomControls
+            zoomLevel={zoomLevel}
+            onZoomIn={zoomIn}
+            onZoomOut={zoomOut}
+            onReset={resetZoom}
+            canZoomIn={canZoomIn}
+            canZoomOut={canZoomOut}
+            isPanMode={isPanMode}
+            onTogglePanMode={togglePanMode}
+            isPanned={isPanned}
+          />
+
+          {/* Divider */}
+          <div className="w-px h-8 bg-[var(--line)] mx-1" />
+
+          {/* Hint */}
           <button
             onClick={handleHint}
             className="relative w-14 h-14 rounded-full bg-white shadow-md flex items-center justify-center hover:shadow-lg transition-all active:scale-95 cursor-pointer"
@@ -126,6 +171,7 @@ export default function GameScreen() {
             </span>
           </button>
 
+          {/* Grid Toggle */}
           <button
             onClick={() => dispatch({ type: 'TOGGLE_SETTING', key: 'showGrid' })}
             className={`w-14 h-14 rounded-full flex items-center justify-center transition-all active:scale-95 shadow-md cursor-pointer ${
@@ -133,10 +179,11 @@ export default function GameScreen() {
                 ? 'bg-white ring-2 ring-[var(--indigo)]'
                 : 'bg-white/80'
             }`}
+            aria-label="Toggle Grid"
           >
             <Grid3x3
-              size={22}
-              className={state.player.settings.showGrid ? 'text-[var(--indigo)]' : 'text-[var(--gray)]'}
+              size={24}
+              className={state.player.settings.showGrid ? 'text-[var(--indigo)]' : 'text-[var(--navy-soft)]'}
             />
           </button>
         </div>
