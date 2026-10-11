@@ -31,8 +31,29 @@ import Level31 from './Level31';
 import Level32 from './Level32';
 import Level33 from './Level33';
 import Level34 from './Level34';
+import Level35 from './Level35';
+import Level36 from './Level36';
+import Level37 from './Level37';
+import Level38 from './Level38';
+import Level39 from './Level39';
+import Level40 from './Level40';
+import Level41 from './Level41';
+import Level42 from './Level42';
+import Level43 from './Level43';
+import Level44 from './Level44';
+import Level45 from './Level45';
+import Level46 from './Level46';
+import Level47 from './Level47';
+import Level48 from './Level48';
+import Level49 from './Level49';
+import Level50 from './Level50';
+import Level51 from './Level51';
+import Level52 from './Level52';
+import Level53 from './Level53';
+import Level54 from './Level54';
+import Level55 from './Level55';
 
-export { Level1, Level2, Level3, Level4, Level5, Level6, Level7, Level8, Level9, Level10, Level11, Level12, Level14, Level15, Level16, Level18, Level19, Level20, Level21, Level22, Level23, Level24, Level25, Level26, Level27, Level28, Level29, Level30, Level31, Level32, Level33, Level34 };
+export { Level1, Level2, Level3, Level4, Level5, Level6, Level7, Level8, Level9, Level10, Level11, Level12, Level14, Level15, Level16, Level18, Level19, Level20, Level21, Level22, Level23, Level24, Level25, Level26, Level27, Level28, Level29, Level30, Level31, Level32, Level33, Level34, Level35, Level36, Level37, Level38, Level39, Level40, Level41, Level42, Level43, Level44, Level45, Level46, Level47, Level48, Level49, Level50, Level51, Level52, Level53, Level54, Level55 };
 
 // Helper to get custom level component if available
 export const LEVEL_COMPONENTS: Record<number, React.ComponentType> = {
@@ -68,6 +89,27 @@ export const LEVEL_COMPONENTS: Record<number, React.ComponentType> = {
   32: Level32,
   33: Level33,
   34: Level34,
+  35: Level35,
+  36: Level36,
+  37: Level37,
+  38: Level38,
+  39: Level39,
+  40: Level40,
+  41: Level41,
+  42: Level42,
+  43: Level43,
+  44: Level44,
+  45: Level45,
+  46: Level46,
+  47: Level47,
+  48: Level48,
+  49: Level49,
+  50: Level50,
+  51: Level51,
+  52: Level52,
+  53: Level53,
+  54: Level54,
+  55: Level55,
 };
 
 export function getCustomLevel(levelId: number): React.ComponentType | null {

@@ -591,6 +591,195 @@ const level34: LevelData = {
   arrows: [], // Handled by custom component Level34.tsx
 };
 
+const level35: LevelData = {
+  id: 35,
+  gridRows: 41,
+  gridCols: 35,
+  par: 59,
+  difficulty: 10,
+  arrows: [], // Handled by custom component Level35.tsx
+};
+
+const level36: LevelData = {
+  id: 36,
+  gridRows: 33,
+  gridCols: 28,
+  par: 68,
+  difficulty: 10,
+  arrows: [], // Handled by custom component Level36.tsx
+};
+
+const level37: LevelData = {
+  id: 37,
+  gridRows: 32,
+  gridCols: 31,
+  par: 61,
+  difficulty: 10,
+  arrows: [], // Handled by custom component Level37.tsx
+};
+
+const level38: LevelData = {
+  id: 38,
+  gridRows: 35,
+  gridCols: 37,
+  par: 64,
+  difficulty: 10,
+  arrows: [], // Handled by custom component Level38.tsx
+};
+
+const level39: LevelData = {
+  id: 39,
+  gridRows: 37,
+  gridCols: 35,
+  par: 60,
+  difficulty: 10,
+  arrows: [], // Handled by custom component Level39.tsx
+};
+
+const level40: LevelData = {
+  id: 40,
+  gridRows: 41,
+  gridCols: 35,
+  par: 70,
+  difficulty: 10,
+  arrows: [], // Handled by custom component Level40.tsx
+};
+
+const level41: LevelData = {
+  id: 41,
+  gridRows: 32,
+  gridCols: 32,
+  par: 43,
+  difficulty: 10,
+  arrows: [], // Handled by custom component Level41.tsx
+};
+
+const level42: LevelData = {
+  id: 42,
+  gridRows: 22,
+  gridCols: 18,
+  par: 36,
+  difficulty: 10,
+  arrows: [], // Handled by custom component Level42.tsx
+};
+
+const level43: LevelData = {
+  id: 43,
+  gridRows: 41,
+  gridCols: 34,
+  par: 67,
+  difficulty: 10,
+  arrows: [], // Handled by custom component Level43.tsx
+};
+
+const level44: LevelData = {
+  id: 44,
+  gridRows: 50,
+  gridCols: 35,
+  par: 46,
+  difficulty: 10,
+  arrows: [], // Handled by custom component Level44.tsx
+};
+
+const level45: LevelData = {
+  id: 45,
+  gridRows: 53,
+  gridCols: 50,
+  par: 164,
+  difficulty: 10,
+  arrows: [], // Handled by custom component Level45.tsx
+};
+
+const level46: LevelData = {
+  id: 46,
+  gridRows: 40,
+  gridCols: 40,
+  par: 76,
+  difficulty: 10,
+  arrows: [], // Handled by custom component Level46.tsx
+};
+
+const level47: LevelData = {
+  id: 47,
+  gridRows: 32,
+  gridCols: 39,
+  par: 52,
+  difficulty: 10,
+  arrows: [], // Handled by custom component Level47.tsx
+};
+
+const level48: LevelData = {
+  id: 48,
+  gridRows: 30,
+  gridCols: 32,
+  par: 41,
+  difficulty: 10,
+  arrows: [], // Handled by custom component Level48.tsx
+};
+
+const level49: LevelData = {
+  id: 49,
+  gridRows: 33,
+  gridCols: 31,
+  par: 41,
+  difficulty: 10,
+  arrows: [], // Handled by custom component Level49.tsx
+};
+
+const level50: LevelData = {
+  id: 50,
+  gridRows: 38,
+  gridCols: 32,
+  par: 91,
+  difficulty: 10,
+  arrows: [], // Handled by custom component Level50.tsx
+};
+
+const level51: LevelData = {
+  id: 51,
+  gridRows: 32,
+  gridCols: 27,
+  par: 42,
+  difficulty: 10,
+  arrows: [], // Handled by custom component Level51.tsx
+};
+
+const level52: LevelData = {
+  id: 52,
+  gridRows: 29,
+  gridCols: 27,
+  par: 40,
+  difficulty: 10,
+  arrows: [], // Handled by custom component Level52.tsx
+};
+
+const level53: LevelData = {
+  id: 53,
+  gridRows: 47,
+  gridCols: 47,
+  par: 107,
+  difficulty: 10,
+  arrows: [], // Handled by custom component Level53.tsx
+};
+
+const level54: LevelData = {
+  id: 54,
+  gridRows: 48,
+  gridCols: 47,
+  par: 61,
+  difficulty: 10,
+  arrows: [], // Handled by custom component Level54.tsx
+};
+
+const level55: LevelData = {
+  id: 55,
+  gridRows: 52,
+  gridCols: 31,
+  par: 42,
+  difficulty: 10,
+  arrows: [], // Handled by custom component Level55.tsx
+};
+
 export const ALL_LEVELS: LevelData[] = [
   level1,
   level2,
@@ -626,6 +815,27 @@ export const ALL_LEVELS: LevelData[] = [
   level32,
   level33,
   level34,
+  level35,
+  level36,
+  level37,
+  level38,
+  level39,
+  level40,
+  level41,
+  level42,
+  level43,
+  level44,
+  level45,
+  level46,
+  level47,
+  level48,
+  level49,
+  level50,
+  level51,
+  level52,
+  level53,
+  level54,
+  level55,
 ];
 
 export function getLevelById(id: number): LevelData | undefined {

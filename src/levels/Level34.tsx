@@ -666,6 +666,11 @@ export default function Level34() {
     buildBoard();
   };
 
+  const handleNextLevel = () => {
+    setIsWon(false);
+    dispatch({ type: 'START_LEVEL', levelId: 35 });
+  };
+
   const handleLevelSelect = () => {
     setIsWon(false);
     dispatch({ type: 'SET_SCREEN', screen: 'levels' });
@@ -793,8 +798,8 @@ export default function Level34() {
             <p>Level {currentLevelId} Cleared</p>
             <div className="lvl34-trophy">🏆</div>
             <div className="lvl34-stars">★ ★ ★</div>
-            <button className="lvl34-next" onClick={handleLevelSelect}>
-              Level Select ➔
+            <button className="lvl34-next" onClick={handleNextLevel}>
+              Next Level ➔
             </button>
             <button
               onClick={() => {
