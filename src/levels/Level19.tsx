@@ -497,10 +497,9 @@ export default function Level19() {
       const a = arrowsRef.current[id];
       if (!a || a.gone || a.busy || isInputLockedRef.current) return;
 
-      const target = currentTarget();
       const clear = isExitPathClear(id);
 
-      if (id !== target && !clear) {
+      if (!clear) {
         collide(id);
         return;
       }
@@ -508,7 +507,7 @@ export default function Level19() {
       playTapSound(true);
       removeArrow(id);
     },
-    [currentTarget, isExitPathClear, collide, removeArrow]
+    [isExitPathClear, collide, removeArrow]
   );
 
   const buildBoard = useCallback(() => {
@@ -671,7 +670,7 @@ export default function Level19() {
         {/* Header */}
         <header className="lvl19-topbar">
           <div className="lvl19-btns">
-            <button className="lvl19-round-btn" onClick={handleHome} aria-label="Back">
+            <button className="lvl19-round-btn" onClick={handleLevels} aria-label="Back">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
                 <path d="M15 5l-7 7 7 7" />
               </svg>

@@ -1,8 +1,8 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 
-export const ZOOM_MIN = 0.7;
-export const ZOOM_MAX = 2.6;
-export const ZOOM_STEP = 0.2;
+export const ZOOM_MIN = 0.55;
+export const ZOOM_MAX = 3.2;
+export const ZOOM_STEP = 0.16;
 
 export interface PanOffset {
   x: number;
@@ -50,31 +50,43 @@ export function useZoom(initialZoom = 1) {
 
   // Clamp pan based on current zoom level so the board doesn't get lost
   const clampPan = useCallback((x: number, y: number, zoom: number): PanOffset => {
-    const maxPanX = Math.max(160, (zoom - 0.4) * 360);
-    const maxPanY = Math.max(180, (zoom - 0.4) * 440);
+    const maxPanX = Math.max(320, (zoom - 0.2) * 550);
+    const maxPanY = Math.max(380, (zoom - 0.2) * 650);
     return {
       x: Math.max(-maxPanX, Math.min(maxPanX, Math.round(x))),
       y: Math.max(-maxPanY, Math.min(maxPanY, Math.round(y))),
     };
   }, []);
 
-  // Multi-touch gestures (Pinch-to-zoom + 2-finger Pan) & 1-finger pan & Mouse interactions
+  // Multi-touch gestures (Pinch-to-zoom + 2-finger Pan) & PC Mouse interactions (Wheel zoom, drag & double-tap hold to pan)
   useEffect(() => {
     const el = boardRef.current;
     if (!el) return;
 
-    // Track active touch points
+    // Track active touch points (multi-touch pinch)
     let touchStartDist = 0;
     let touchStartZoom = 1;
     let touchStartCenter = { x: 0, y: 0 };
     let touchStartPan = { x: 0, y: 0 };
-    let singleTouchStart = { x: 0, y: 0 };
-    let isSingleTouchPanning = false;
 
-    // Track mouse dragging
-    let mouseStart = { x: 0, y: 0 };
+    // Multi-touch flags to guarantee arrows NEVER trigger when 2 fingers / hands are used
+    let wasMultiTouch = false;
+    let lastMultiTouchEndTime = 0;
+    const activePointers = new Map<number, { clientX: number; clientY: number }>();
+
+    // Track pointer state (mouse & touch)
+    let isPointerDragging = false;
+    let dragCandidate = false;
+    let potentialArrowTarget: Element | null = null;
+    let downPos = { x: 0, y: 0 };
     let mouseStartPan = { x: 0, y: 0 };
-    let isMouseDragging = false;
+
+    // Double-tap tracking for PC double-click & hold to drag
+    let lastTapUpTime = 0;
+    let lastTapDownPos = { x: 0, y: 0 };
+    let pendingTapTimer: ReturnType<typeof setTimeout> | null = null;
+    let pendingTapTarget: Element | null = null;
+    let pendingTapPos = { x: 0, y: 0 };
 
     const getDistance = (t0: Touch, t1: Touch) => {
       const dx = t0.clientX - t1.clientX;
@@ -89,159 +101,365 @@ export function useZoom(initialZoom = 1) {
       };
     };
 
-    const isInteractiveElement = (target: EventTarget | null): boolean => {
+    const isArrowElement = (target: EventTarget | null): boolean => {
       if (!target || !(target instanceof Element)) return false;
-      // Check if target is an arrow, button, or clickable element
       return !!target.closest(
-        'button, a, input, select, textarea, [role="button"], [class*="arrow"], polyline, polygon, path.head, .lvl1-arrow, .lvl1-circle, .lvl2-round'
+        '[class*="arrow"], polyline, polygon, path.head, path[class*="-head"], .lvl1-arrow, .lvl1-col, [class*="-head"], [class*="-pathline"]'
       );
     };
 
-    // --- Touch Handlers ---
-    const onTouchStart = (e: TouchEvent) => {
-      if (e.touches.length === 2) {
-        // Multi-touch: 2 fingers -> Pinch to zoom + Pan simultaneously
-        e.preventDefault();
-        touchStartDist = getDistance(e.touches[0], e.touches[1]);
-        touchStartZoom = zoomRef.current;
-        touchStartCenter = getCenter(e.touches[0], e.touches[1]);
-        touchStartPan = { ...panRef.current };
-        isSingleTouchPanning = false;
-        setIsDragging(true);
-      } else if (e.touches.length === 1) {
-        // Single touch: Check if in Pan Mode or touching background
-        const target = e.target;
-        const isInteractive = isInteractiveElement(target);
-
-        if (isPanModeRef.current || !isInteractive) {
-          // If in pan mode, or if touching empty space, initiate drag/pan
-          singleTouchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-          touchStartPan = { ...panRef.current };
-          isSingleTouchPanning = true;
-          // Don't preventDefault immediately if not in pan mode so short taps still work
-          if (isPanModeRef.current) {
-            e.preventDefault();
-            setIsDragging(true);
-          }
+    const flushPendingTap = () => {
+      if (pendingTapTimer) {
+        clearTimeout(pendingTapTimer);
+        pendingTapTimer = null;
+      }
+      if (pendingTapTarget) {
+        const target = pendingTapTarget;
+        const pos = pendingTapPos;
+        pendingTapTarget = null;
+        try {
+          const tapEvt = new PointerEvent('pointerdown', {
+            bubbles: true,
+            cancelable: true,
+            clientX: pos.x,
+            clientY: pos.y,
+            pointerType: 'mouse',
+          });
+          (tapEvt as unknown as { _isVerifiedTap: boolean })._isVerifiedTap = true;
+          target.dispatchEvent(tapEvt);
+        } catch {
+          // ignore error if element unmounted
         }
       }
     };
 
-    const onTouchMove = (e: TouchEvent) => {
-      if (e.touches.length === 2 && touchStartDist > 0) {
-        // 2-finger pinch & drag
+    const cancelPendingTap = () => {
+      if (pendingTapTimer) {
+        clearTimeout(pendingTapTimer);
+        pendingTapTimer = null;
+      }
+      pendingTapTarget = null;
+      dragCandidate = false;
+      potentialArrowTarget = null;
+    };
+
+    // --- Pointer Events (Mouse + Touch) in Capture Phase ---
+    const onPointerDownCapture = (e: PointerEvent) => {
+      // If synthetic verified tap from our tap timer, let it reach the arrow!
+      if ((e as unknown as { _isVerifiedTap?: boolean })._isVerifiedTap) {
+        return;
+      }
+
+      activePointers.set(e.pointerId, { clientX: e.clientX, clientY: e.clientY });
+
+      // If 2 or more pointers are active: MULTI-TOUCH / PINCH MODE!
+      if (activePointers.size >= 2) {
+        wasMultiTouch = true;
+        lastMultiTouchEndTime = performance.now();
+        cancelPendingTap();
         e.preventDefault();
-        const currentDist = getDistance(e.touches[0], e.touches[1]);
-        const currentCenter = getCenter(e.touches[0], e.touches[1]);
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        return;
+      }
 
-        const scale = currentDist / touchStartDist;
-        const newZoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, +(touchStartZoom * scale).toFixed(2)));
+      // If recent multi-touch pinch ended less than 400ms ago, ignore stray single finger taps
+      const now = performance.now();
+      if (now - lastMultiTouchEndTime < 400) {
+        wasMultiTouch = true;
+        cancelPendingTap();
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        return;
+      }
 
-        const centerDeltaX = currentCenter.x - touchStartCenter.x;
-        const centerDeltaY = currentCenter.y - touchStartCenter.y;
+      // Middle click (1) or Right click (2): always pan immediately!
+      if (e.button === 1 || e.button === 2) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        cancelPendingTap();
+        isPointerDragging = true;
+        downPos = { x: e.clientX, y: e.clientY };
+        mouseStartPan = { ...panRef.current };
+        setIsDragging(true);
+        document.body.classList.add('is-board-dragging');
+        return;
+      }
 
-        const newPan = clampPan(touchStartPan.x + centerDeltaX, touchStartPan.y + centerDeltaY, newZoom);
+      if (e.button !== 0) return; // ignore other buttons
 
-        setZoomLevel(newZoom);
+      const distFromLastTap = Math.hypot(e.clientX - lastTapDownPos.x, e.clientY - lastTapDownPos.y);
+      const timeSinceLastTap = now - lastTapUpTime;
+
+      // Double-click / double-tap detection: 2nd tap within 360ms and within 35px
+      const isDoubleTap = e.pointerType === 'mouse' && timeSinceLastTap < 360 && distFromLastTap < 35;
+
+      if (isDoubleTap) {
+        // Double-tap & hold detected! Cancel 1st tap so arrow NEVER triggers!
+        cancelPendingTap();
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+
+        isPointerDragging = true;
+        downPos = { x: e.clientX, y: e.clientY };
+        mouseStartPan = { ...panRef.current };
+        setIsDragging(true);
+        document.body.classList.add('is-board-dragging');
+        return;
+      }
+
+      // If user tapped a different area while another tap was pending, flush previous tap immediately
+      if (pendingTapTarget) {
+        flushPendingTap();
+      }
+
+      const targetEl = e.target instanceof Element ? e.target : null;
+      const isArrow = isArrowElement(targetEl);
+
+      if (!isArrow || isPanModeRef.current) {
+        // Clicked on empty board background / grid / dots or in Pan Mode
+        e.preventDefault();
+        isPointerDragging = true;
+        downPos = { x: e.clientX, y: e.clientY };
+        mouseStartPan = { ...panRef.current };
+        setIsDragging(true);
+        document.body.classList.add('is-board-dragging');
+      } else {
+        // Clicked on an arrow! Intercept in capture phase so arrow doesn't fire prematurely on pointerdown
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+
+        dragCandidate = true;
+        potentialArrowTarget = targetEl?.closest('[class*="arrow"], .lvl1-arrow') || targetEl;
+        downPos = { x: e.clientX, y: e.clientY };
+        mouseStartPan = { ...panRef.current };
+      }
+    };
+
+    const onPointerMoveCapture = (e: PointerEvent) => {
+      activePointers.set(e.pointerId, { clientX: e.clientX, clientY: e.clientY });
+
+      // If multi-touch, ensure no arrow tap candidate is active
+      if (activePointers.size >= 2 || wasMultiTouch) {
+        cancelPendingTap();
+        return;
+      }
+
+      if (isPointerDragging) {
+        e.preventDefault();
+        const dx = e.clientX - downPos.x;
+        const dy = e.clientY - downPos.y;
+        const newPan = clampPan(mouseStartPan.x + dx, mouseStartPan.y + dy, zoomRef.current);
         setPanOffset(newPan);
-      } else if (e.touches.length === 1 && isSingleTouchPanning) {
-        const dx = e.touches[0].clientX - singleTouchStart.x;
-        const dy = e.touches[0].clientY - singleTouchStart.y;
+        return;
+      }
 
-        // If moved more than 6px, treat as intentional pan
-        if (Math.hypot(dx, dy) > 6 || isPanModeRef.current) {
-          e.preventDefault();
+      if (dragCandidate) {
+        const dist = Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y);
+        if (dist > 7) {
+          // Moved more than 7px! This is a DRAG gesture, not an arrow tap!
+          dragCandidate = false;
+          potentialArrowTarget = null;
+          isPointerDragging = true;
           setIsDragging(true);
-          const newPan = clampPan(touchStartPan.x + dx, touchStartPan.y + dy, zoomRef.current);
+          document.body.classList.add('is-board-dragging');
+
+          const dx = e.clientX - downPos.x;
+          const dy = e.clientY - downPos.y;
+          const newPan = clampPan(mouseStartPan.x + dx, mouseStartPan.y + dy, zoomRef.current);
           setPanOffset(newPan);
         }
       }
     };
 
-    const onTouchEnd = (e: TouchEvent) => {
-      if (e.touches.length === 0) {
-        touchStartDist = 0;
-        isSingleTouchPanning = false;
+    const onPointerUpCapture = (e: PointerEvent) => {
+      activePointers.delete(e.pointerId);
+
+      if ((e as unknown as { _isVerifiedTap?: boolean })._isVerifiedTap) return;
+
+      const now = performance.now();
+      const isMultiTouchRecent = wasMultiTouch || (now - lastMultiTouchEndTime < 400);
+
+      if (isMultiTouchRecent) {
+        // Was pinching/multi-touch! NEVER tap arrows from lifting fingers
+        cancelPendingTap();
+        if (activePointers.size === 0) {
+          wasMultiTouch = false;
+          isPointerDragging = false;
+          setIsDragging(false);
+          document.body.classList.remove('is-board-dragging');
+        }
+        return;
+      }
+
+      if (isPointerDragging) {
+        isPointerDragging = false;
         setIsDragging(false);
-      } else if (e.touches.length === 1) {
-        // Transitioned from 2 fingers to 1 finger
-        singleTouchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-        touchStartPan = { ...panRef.current };
-        isSingleTouchPanning = isPanModeRef.current;
-        setIsDragging(false);
+        document.body.classList.remove('is-board-dragging');
+        lastTapUpTime = 0; // Prevent drag release from counting as a double-tap
+        return;
+      }
+
+      if (dragCandidate) {
+        dragCandidate = false;
+        const targetToTap = potentialArrowTarget;
+        potentialArrowTarget = null;
+
+        if (targetToTap) {
+          lastTapUpTime = now;
+          lastTapDownPos = { ...downPos };
+          pendingTapTarget = targetToTap;
+          pendingTapPos = { x: e.clientX, y: e.clientY };
+
+          // On mobile touch: very quick 40ms dispatch for crisp responsiveness
+          // On PC mouse: 180ms delay to allow double-tap hold to drag without triggering arrow
+          const tapDelay = e.pointerType === 'touch' ? 40 : 180;
+          pendingTapTimer = setTimeout(() => {
+            flushPendingTap();
+          }, tapDelay);
+        }
       }
     };
 
-    // --- PC Mouse Wheel Handler ---
+    const onPointerCancelCapture = (e: PointerEvent) => {
+      activePointers.delete(e.pointerId);
+      cancelPendingTap();
+      isPointerDragging = false;
+      setIsDragging(false);
+      document.body.classList.remove('is-board-dragging');
+    };
+
+    // --- PC Mouse Wheel Handler (Zoom centered on cursor) ---
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
-      const zoomDelta = e.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP;
-      const newZoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, +(zoomRef.current + zoomDelta).toFixed(2)));
-      setZoomLevel(newZoom);
+      e.stopPropagation();
+      cancelPendingTap();
+
+      const rect = el.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left - rect.width / 2;
+      const mouseY = e.clientY - rect.top - rect.height / 2;
+
+      const currentZoom = zoomRef.current;
+      const zoomFactor = e.deltaY < 0 ? 1.15 : 0.87;
+      const newZoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, +(currentZoom * zoomFactor).toFixed(2)));
+
+      if (newZoom !== currentZoom) {
+        const scaleChange = newZoom / currentZoom;
+        const newPanX = panRef.current.x - (mouseX - panRef.current.x) * (scaleChange - 1);
+        const newPanY = panRef.current.y - (mouseY - panRef.current.y) * (scaleChange - 1);
+
+        setZoomLevel(newZoom);
+        setPanOffset(clampPan(newPanX, newPanY, newZoom));
+      }
     };
 
-    // --- PC Mouse Drag Handlers ---
-    const onMouseDown = (e: MouseEvent) => {
-      // Middle click (button 1) OR Left click in Pan Mode OR Left click on non-interactive background
-      const isMiddle = e.button === 1;
-      const isLeft = e.button === 0;
-      const isInteractive = isInteractiveElement(e.target);
-
-      if (isMiddle || (isLeft && (isPanModeRef.current || !isInteractive))) {
+    // --- Mobile Touch Gestures (Pinch to zoom + 2-finger pan) in Capture Phase ---
+    const onTouchStartCapture = (e: TouchEvent) => {
+      if (e.touches.length >= 2) {
         e.preventDefault();
-        isMouseDragging = true;
-        mouseStart = { x: e.clientX, y: e.clientY };
-        mouseStartPan = { ...panRef.current };
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+
+        // 2 fingers detected! Absolutely cancel any pending or candidate arrow tap!
+        wasMultiTouch = true;
+        lastMultiTouchEndTime = performance.now();
+        cancelPendingTap();
+        isPointerDragging = false;
+
+        touchStartDist = getDistance(e.touches[0], e.touches[1]);
+        touchStartZoom = zoomRef.current;
+        touchStartCenter = getCenter(e.touches[0], e.touches[1]);
+        touchStartPan = { ...panRef.current };
         setIsDragging(true);
+        document.body.classList.add('is-board-dragging');
       }
     };
 
-    const onMouseMove = (e: MouseEvent) => {
-      if (!isMouseDragging) return;
-      e.preventDefault();
-      const dx = e.clientX - mouseStart.x;
-      const dy = e.clientY - mouseStart.y;
-      const newPan = clampPan(mouseStartPan.x + dx, mouseStartPan.y + dy, zoomRef.current);
-      setPanOffset(newPan);
+    const onTouchMoveCapture = (e: TouchEvent) => {
+      if (e.touches.length >= 2) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+
+        wasMultiTouch = true;
+        lastMultiTouchEndTime = performance.now();
+        cancelPendingTap();
+
+        if (touchStartDist > 0) {
+          const currentDist = getDistance(e.touches[0], e.touches[1]);
+          const currentCenter = getCenter(e.touches[0], e.touches[1]);
+
+          const scale = currentDist / touchStartDist;
+          const newZoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, +(touchStartZoom * scale).toFixed(2)));
+
+          const centerDeltaX = currentCenter.x - touchStartCenter.x;
+          const centerDeltaY = currentCenter.y - touchStartCenter.y;
+
+          const newPan = clampPan(touchStartPan.x + centerDeltaX, touchStartPan.y + centerDeltaY, newZoom);
+
+          setZoomLevel(newZoom);
+          setPanOffset(newPan);
+        }
+      }
     };
 
-    const onMouseUp = () => {
-      if (isMouseDragging) {
-        isMouseDragging = false;
+    const onTouchEndCapture = (e: TouchEvent) => {
+      if (wasMultiTouch || e.touches.length > 0) {
+        // Multi-touch ending: lock out all arrow taps!
+        lastMultiTouchEndTime = performance.now();
+        cancelPendingTap();
+      }
+
+      if (e.touches.length < 2) {
+        touchStartDist = 0;
+      }
+
+      if (e.touches.length === 0) {
+        isPointerDragging = false;
         setIsDragging(false);
+        document.body.classList.remove('is-board-dragging');
       }
     };
 
-    // --- Double click to reset ---
-    const onDblClick = (e: MouseEvent) => {
-      if (!isInteractiveElement(e.target)) {
-        resetZoom();
-      }
-    };
+    // Attach capture listeners to intercept before arrows
+    el.addEventListener('pointerdown', onPointerDownCapture, { capture: true, passive: false });
+    window.addEventListener('pointermove', onPointerMoveCapture, { passive: false });
+    window.addEventListener('pointerup', onPointerUpCapture);
+    window.addEventListener('pointercancel', onPointerCancelCapture);
 
-    // Attach listeners
-    el.addEventListener('touchstart', onTouchStart, { passive: false });
-    el.addEventListener('touchmove', onTouchMove, { passive: false });
-    el.addEventListener('touchend', onTouchEnd);
-    el.addEventListener('touchcancel', onTouchEnd);
     el.addEventListener('wheel', onWheel, { passive: false });
-    el.addEventListener('mousedown', onMouseDown);
-    el.addEventListener('dblclick', onDblClick);
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onMouseUp);
+    el.addEventListener('touchstart', onTouchStartCapture, { capture: true, passive: false });
+    el.addEventListener('touchmove', onTouchMoveCapture, { capture: true, passive: false });
+    el.addEventListener('touchend', onTouchEndCapture, { capture: true });
+    el.addEventListener('touchcancel', onTouchEndCapture, { capture: true });
+
+    // Prevent context menu on long-press or right-click within the board so panning is uninterrupted
+    const onContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+    };
+    el.addEventListener('contextmenu', onContextMenu);
 
     return () => {
-      el.removeEventListener('touchstart', onTouchStart);
-      el.removeEventListener('touchmove', onTouchMove);
-      el.removeEventListener('touchend', onTouchEnd);
-      el.removeEventListener('touchcancel', onTouchEnd);
+      cancelPendingTap();
+      document.body.classList.remove('is-board-dragging');
+
+      el.removeEventListener('pointerdown', onPointerDownCapture, { capture: true });
+      window.removeEventListener('pointermove', onPointerMoveCapture);
+      window.removeEventListener('pointerup', onPointerUpCapture);
+      window.removeEventListener('pointercancel', onPointerCancelCapture);
+
       el.removeEventListener('wheel', onWheel);
-      el.removeEventListener('mousedown', onMouseDown);
-      el.removeEventListener('dblclick', onDblClick);
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mouseup', onMouseUp);
+      el.removeEventListener('touchstart', onTouchStartCapture, { capture: true });
+      el.removeEventListener('touchmove', onTouchMoveCapture, { capture: true });
+      el.removeEventListener('touchend', onTouchEndCapture, { capture: true });
+      el.removeEventListener('touchcancel', onTouchEndCapture, { capture: true });
+      el.removeEventListener('contextmenu', onContextMenu);
     };
-  }, [clampPan, resetZoom]);
+  }, [clampPan]);
 
   const isZoomed = zoomLevel !== 1;
   const isPanned = panOffset.x !== 0 || panOffset.y !== 0;
@@ -253,13 +471,13 @@ export function useZoom(initialZoom = 1) {
     return {
       transform: `translate3d(${panOffset.x}px, ${panOffset.y}px, 0) scale(${zoomLevel})`,
       transformOrigin: 'center center',
-      transition: isDragging ? 'none' : 'transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1)',
-      cursor: isPanMode ? (isDragging ? 'grabbing' : 'grab') : 'default',
+      transition: isDragging ? 'none' : 'transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1)',
+      cursor: isDragging ? 'grabbing' : 'grab',
       touchAction: 'none',
       userSelect: 'none',
       WebkitUserSelect: 'none',
     };
-  }, [panOffset.x, panOffset.y, zoomLevel, isDragging, isPanMode]);
+  }, [panOffset.x, panOffset.y, zoomLevel, isDragging]);
 
   return {
     zoomLevel,

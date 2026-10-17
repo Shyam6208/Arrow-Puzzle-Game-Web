@@ -198,7 +198,7 @@ export default function Level1() {
         <section className="lvl1-game">
           {/* Top Bar */}
           <div className="lvl1-topbar">
-            <button className="lvl1-top-icon lvl1-back" onClick={handleHome} aria-label="Back">
+            <button className="lvl1-top-icon lvl1-back" onClick={handleLevels} aria-label="Back">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
                 <path d="M15 5l-7 7 7 7" />
               </svg>

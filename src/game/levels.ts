@@ -45,7 +45,7 @@ const level2: LevelData = {
     // Straight arrow pointing up
     makeArrow([{ row: 5, col: 4 }, { row: 4, col: 4 }, { row: 3, col: 4 }], 'up'),
     // Straight arrow pointing right
-    makeArrow([{ row: 4, col: 2 }, { row: 4, col: 3 }], 'right'),
+    makeArrow([{ row: 4, col: 1 }, { row: 4, col: 2 }], 'right'),
     // Straight arrow pointing down (long)
     makeArrow([{ row: 1, col: 5 }, { row: 2, col: 5 }, { row: 3, col: 5 }, { row: 4, col: 5 }, { row: 5, col: 5 }], 'down'),
     // Straight arrow pointing left
@@ -95,7 +95,7 @@ const level5: LevelData = {
   difficulty: 3,
   arrows: [
     makeArrow([{ row: 1, col: 1 }, { row: 1, col: 2 }, { row: 1, col: 3 }], 'right'),
-    makeArrow([{ row: 1, col: 5 }, { row: 2, col: 5 }, { row: 3, col: 5 }], 'down'),
+    makeArrow([{ row: 1, col: 5 }, { row: 2, col: 5 }], 'down'),
     makeArrow([{ row: 3, col: 5 }, { row: 3, col: 4 }, { row: 3, col: 3 }], 'left'),
     makeArrow([{ row: 5, col: 3 }, { row: 4, col: 3 }], 'up'),
     makeArrow([{ row: 5, col: 4 }, { row: 5, col: 5 }, { row: 5, col: 6 }], 'right'),
@@ -111,7 +111,7 @@ const level6: LevelData = {
   arrows: [
     makeArrow([{ row: 2, col: 1 }, { row: 2, col: 2 }, { row: 2, col: 3 }, { row: 2, col: 4 }], 'right'),
     makeArrow([{ row: 2, col: 5 }, { row: 3, col: 5 }, { row: 4, col: 5 }], 'down'),
-    makeArrow([{ row: 4, col: 5 }, { row: 4, col: 4 }, { row: 4, col: 3 }], 'left'),
+    makeArrow([{ row: 4, col: 4 }, { row: 4, col: 3 }], 'left'),
     makeArrow([{ row: 4, col: 2 }, { row: 3, col: 2 }], 'up'),
     makeArrow([{ row: 6, col: 3 }, { row: 6, col: 4 }, { row: 6, col: 5 }, { row: 6, col: 6 }], 'right'),
     makeArrow([{ row: 0, col: 3 }, { row: 1, col: 3 }], 'down'),
@@ -125,9 +125,9 @@ const level7: LevelData = {
   par: 6,
   difficulty: 5,
   arrows: [
-    makeArrow([{ row: 1, col: 1 }, { row: 2, col: 1 }, { row: 3, col: 1 }, { row: 4, col: 1 }], 'down'),
+    makeArrow([{ row: 1, col: 1 }, { row: 2, col: 1 }, { row: 3, col: 1 }], 'down'),
     makeArrow([{ row: 4, col: 1 }, { row: 4, col: 2 }, { row: 4, col: 3 }], 'right'),
-    makeArrow([{ row: 1, col: 4 }, { row: 1, col: 5 }, { row: 1, col: 6 }, { row: 1, col: 7 }], 'right'),
+    makeArrow([{ row: 1, col: 4 }, { row: 1, col: 5 }, { row: 1, col: 6 }], 'right'),
     makeArrow([{ row: 4, col: 7 }, { row: 3, col: 7 }, { row: 2, col: 7 }, { row: 1, col: 7 }], 'up'),
     makeArrow([{ row: 6, col: 4 }, { row: 6, col: 5 }], 'right'),
     makeArrow([{ row: 6, col: 2 }, { row: 5, col: 2 }], 'up'),
@@ -145,7 +145,7 @@ const level8: LevelData = {
     makeArrow([{ row: 3, col: 6 }, { row: 2, col: 6 }, { row: 1, col: 6 }], 'up'),
     makeArrow([{ row: 3, col: 2 }, { row: 3, col: 3 }, { row: 3, col: 4 }], 'right'),
     makeArrow([{ row: 3, col: 5 }, { row: 4, col: 5 }, { row: 5, col: 5 }], 'down'),
-    makeArrow([{ row: 5, col: 5 }, { row: 5, col: 4 }, { row: 5, col: 3 }], 'left'),
+    makeArrow([{ row: 5, col: 4 }, { row: 5, col: 3 }], 'left'),
     makeArrow([{ row: 7, col: 2 }, { row: 6, col: 2 }, { row: 5, col: 2 }], 'up'),
     makeArrow([{ row: 7, col: 4 }, { row: 7, col: 5 }, { row: 7, col: 6 }], 'right'),
   ],
@@ -177,9 +177,9 @@ const level10: LevelData = {
   difficulty: 7,
   arrows: [
     makeArrow([{ row: 1, col: 1 }, { row: 1, col: 2 }, { row: 1, col: 3 }, { row: 1, col: 4 }], 'right'),
-    makeArrow([{ row: 1, col: 6 }, { row: 2, col: 6 }, { row: 3, col: 6 }], 'down'),
+    makeArrow([{ row: 1, col: 6 }, { row: 2, col: 6 }], 'down'),
     makeArrow([{ row: 3, col: 6 }, { row: 3, col: 5 }, { row: 3, col: 4 }], 'left'),
-    makeArrow([{ row: 3, col: 3 }, { row: 4, col: 3 }, { row: 5, col: 3 }], 'down'),
+    makeArrow([{ row: 3, col: 3 }, { row: 4, col: 3 }], 'down'),
     makeArrow([{ row: 5, col: 3 }, { row: 5, col: 4 }, { row: 5, col: 5 }, { row: 5, col: 6 }], 'right'),
     makeArrow([{ row: 5, col: 7 }, { row: 4, col: 7 }, { row: 3, col: 7 }, { row: 2, col: 7 }, { row: 1, col: 7 }], 'up'),
     makeArrow([{ row: 7, col: 2 }, { row: 7, col: 3 }, { row: 7, col: 4 }], 'right'),

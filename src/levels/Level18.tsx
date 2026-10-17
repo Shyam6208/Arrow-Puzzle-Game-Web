@@ -14,76 +14,72 @@ interface ArrowDef {
   cells?: [number, number][];
 }
 
-const RAW_ARROWS: ArrowDef[] = [
-  { id: 'a0', pts: [[1, 16], [4, 16], [4, 11], [5, 11], [5, 1], [4, 1], [4, 2], [3, 2], [3, 1], [2, 1], [2, 2], [1, 2], [1, 0], [0, 0]] },
-  { id: 'a1', pts: [[2, 0], [6, 0], [6, 1], [7, 1], [7, 2], [6, 2], [6, 3]] },
+const RAW_ARROWS: ArrowDef[] = [{ id: 'a0', pts: [[1, 16], [4, 16], [4, 11], [5, 11], [5, 1], [4, 1], [4, 2], [3, 2], [3, 1], [2, 1], [2, 2], [1, 2], [1, 0], [0, 0]] },
+  { id: 'a1', pts: [[6,3],[6,2],[7,2],[7,1],[6,1],[6,0],[2,0]] },
   { id: 'a2', pts: [[12, 0], [7, 0]] },
-  { id: 'a3', pts: [[13, 0], [13, 3]] },
-  { id: 'a4', pts: [[15, 2], [14, 2], [14, 0], [16, 0], [16, 1], [15, 1]] },
-  { id: 'a5', pts: [[0, 1], [0, 15]] },
-  { id: 'a6', pts: [[8, 1], [8, 2]] },
+  { id: 'a3', pts: [[13,3],[13,0]] },
+  { id: 'a4', pts: [[14, 2], [14, 0], [16, 0], [16, 1], [15, 1]] },
+  { id: 'a5', pts: [[0,15],[0,1]] },
+  { id: 'a6', pts: [[8,2],[8,1]] },
   { id: 'a7', pts: [[12, 1], [10, 1]] },
   { id: 'a8', pts: [[12, 3], [9, 3], [9, 1]] },
   { id: 'a9', pts: [[10, 2], [12, 2]] },
-  { id: 'a10', pts: [[16, 2], [15, 2]] },
+  { id: 'a10', pts: [[15,2],[16,2]] },
   { id: 'a11', pts: [[1, 3], [1, 15], [3, 15], [3, 10], [4, 10], [4, 7], [2, 7]] },
   { id: 'a12', pts: [[3, 3], [4, 3]] },
-  { id: 'a13', pts: [[7, 3], [7, 4], [6, 4], [6, 7]] },
+  { id: 'a13', pts: [[6,7],[6,4],[7,4],[7,3]] },
   { id: 'a14', pts: [[16, 12], [16, 9], [15, 9], [15, 8], [11, 8], [11, 7], [12, 7], [12, 6], [10, 6], [10, 4], [8, 4], [8, 3]] },
   { id: 'a15', pts: [[15, 3], [15, 4], [14, 4], [14, 3]] },
   { id: 'a16', pts: [[15, 5], [15, 6], [16, 6], [16, 3]] },
-  { id: 'a17', pts: [[13, 4], [11, 4], [11, 5], [13, 5], [13, 6], [14, 6], [14, 5]] },
+  { id: 'a17', pts: [[14,5],[14,6],[13,6],[13,5],[11,5],[11,4],[13,4]] },
   { id: 'a18', pts: [[4, 4], [2, 4], [2, 5], [4, 5], [4, 6]] },
-  { id: 'a19', pts: [[9, 5], [8, 5], [8, 10]] },
+  { id: 'a19', pts: [[8,10],[8,5],[9,5]] },
   { id: 'a20', pts: [[7, 11], [7, 5]] },
   { id: 'a21', pts: [[2, 6], [3, 6]] },
-  { id: 'a22', pts: [[9, 6], [9, 10]] },
-  { id: 'a23', pts: [[13, 7], [15, 7]] },
+  { id: 'a22', pts: [[9,10],[9,6]] },
+  { id: 'a23', pts: [[15,7],[13,7]] },
   { id: 'a24', pts: [[16, 7], [16, 8]] },
   { id: 'a25', pts: [[10, 9], [10, 7]] },
   { id: 'a26', pts: [[3, 8], [3, 9]] },
   { id: 'a27', pts: [[2, 14], [2, 8]] },
   { id: 'a28', pts: [[6, 11], [6, 8]] },
   { id: 'a29', pts: [[12, 9], [11, 9]] },
-  { id: 'a30', pts: [[15, 10], [14, 10], [14, 9], [13, 9], [13, 10]] },
+  { id: 'a30', pts: [[13,10],[13,9],[14,9],[14,10],[15,10]] },
   { id: 'a31', pts: [[10, 10], [12, 10]] },
-  { id: 'a32', pts: [[8, 11], [12, 11]] },
+  { id: 'a32', pts: [[12,11],[8,11]] },
   { id: 'a33', pts: [[15, 18], [15, 11], [13, 11], [13, 12], [12, 12], [12, 18]] },
   { id: 'a34', pts: [[11, 12], [6, 12]] },
-  { id: 'a35', pts: [[5, 12], [5, 18]] },
+  { id: 'a35', pts: [[5,18],[5,12]] },
   { id: 'a36', pts: [[6, 13], [11, 13], [11, 14], [9, 14]] },
   { id: 'a37', pts: [[14, 14], [13, 14], [13, 13], [14, 13]] },
   { id: 'a38', pts: [[16, 13], [16, 18]] },
   { id: 'a39', pts: [[8, 14], [6, 14]] },
   { id: 'a40', pts: [[6, 18], [6, 15], [11, 15], [11, 17]] },
   { id: 'a41', pts: [[14, 15], [13, 15], [13, 18], [14, 18], [14, 16]] },
-  { id: 'a42', pts: [[0, 18], [2, 18], [2, 17], [0, 17], [0, 16]] },
+  { id: 'a42', pts: [[0,16],[0,17],[2,17],[2,18],[0,18]] },
   { id: 'a43', pts: [[10, 17], [10, 16], [7, 16]] },
-  { id: 'a44', pts: [[3, 17], [4, 17]] },
+  { id: 'a44', pts: [[4,17],[3,17]] },
   { id: 'a45', pts: [[9, 17], [7, 17], [7, 18]] },
-  { id: 'a46', pts: [[3, 18], [4, 18], [4, 19]] },
-  { id: 'a47', pts: [[8, 18], [9, 18]] },
+  { id: 'a46', pts: [[4,19],[4,18],[3,18]] },
+  { id: 'a47', pts: [[9,18],[8,18]] },
   { id: 'a48', pts: [[10, 18], [11, 18]] },
   { id: 'a49', pts: [[1, 21], [1, 20], [3, 20], [3, 19], [0, 19]] },
-  { id: 'a50', pts: [[6, 20], [6, 19], [5, 19], [5, 20], [4, 20], [4, 21], [2, 21]] },
+  { id: 'a50', pts: [[2,21],[4,21],[4,20],[5,20],[5,19],[6,19],[6,20]] },
   { id: 'a51', pts: [[9, 19], [7, 19]] },
-  { id: 'a52', pts: [[10, 19], [12, 19], [12, 20]] },
-  { id: 'a53', pts: [[16, 19], [13, 19], [13, 20], [15, 20], [15, 23], [11, 23], [11, 22], [10, 22], [10, 23], [9, 23], [9, 22], [8, 22], [8, 23], [7, 23]] },
+  { id: 'a52', pts: [[12,20],[12,19],[10,19]] },
+  { id: 'a53', pts: [[7,23],[8,23],[8,22],[9,22],[9,23],[10,23],[10,22],[11,22],[11,23],[15,23],[15,20],[13,20],[13,19],[16,19]] },
   { id: 'a54', pts: [[9, 20], [11, 20]] },
   { id: 'a55', pts: [[16, 20], [16, 23]] },
   { id: 'a56', pts: [[0, 22], [0, 20]] },
-  { id: 'a57', pts: [[8, 21], [8, 20], [7, 20], [7, 21]] },
+  { id: 'a57', pts: [[7,21],[7,20],[8,20],[8,21]] },
   { id: 'a58', pts: [[9, 21], [14, 21]] },
   { id: 'a59', pts: [[7, 22], [6, 22], [6, 23], [5, 23], [5, 21], [6, 21]] },
   { id: 'a60', pts: [[1, 22], [4, 22]] },
-  { id: 'a61', pts: [[14, 22], [12, 22]] },
-  { id: 'a62', pts: [[0, 23], [4, 23]] },
-];
+  { id: 'a61', pts: [[12,22],[14,22]] },
+  { id: 'a62', pts: [[0, 23], [4, 23]] },];
 
 const SOLUTION_INDICES = [
-  0, 49, 55, 8, 23, 11, 37, 50, 57, 58, 14, 15, 16, 52, 9, 31, 32, 46, 20, 17, 35, 45, 48,
-  33, 38, 54, 34, 39, 40, 2, 25, 43, 47, 51, 53, 27, 28, 5, 36, 7, 59, 29, 12, 44, 60, 61,
-  62, 21, 19, 22, 30, 26, 4, 10, 24, 13, 42, 41, 18, 1, 3, 56, 6,
+  0, 1, 2, 3, 5, 6, 8, 7, 4, 10, 9, 11, 13, 14, 15, 16, 12, 17, 19, 20, 22, 25, 23, 28, 30, 31, 35, 42, 44, 46, 49, 53, 55, 38, 24, 56, 57, 58, 59, 50, 51, 45, 52, 54, 61, 33, 37, 41, 48, 40, 43, 47, 60, 62, 18, 21, 26, 27, 29, 32, 34, 39, 36
 ];
 
 function cellsOf(def: ArrowDef): [number, number][] {
@@ -347,13 +343,41 @@ export default function Level18() {
     requestAnimationFrame(step);
   };
 
+  const isExitPathClear = useCallback((id: string): boolean => {
+    const a = arrowsRef.current[id];
+    if (!a || a.gone) return false;
+    const [dc, dr] = a.path.dir;
+    const sdc = Math.round(dc);
+    const sdr = Math.round(dr);
+    let [c, r] = a.def.pts[a.def.pts.length - 1];
+
+    const occ = new Set<string>();
+    ARROWS.forEach((o) => {
+      if (o.id === id || arrowsRef.current[o.id]?.gone) return;
+      o.cells.forEach(([cc, rr]) => occ.add(`${cc},${rr}`));
+    });
+
+    c += sdc;
+    r += sdr;
+    while (c >= 0 && c < GRID.cols && r >= 0 && r < GRID.rows) {
+      if (occ.has(`${c},${r}`)) return false;
+      c += sdc;
+      r += sdr;
+    }
+    return true;
+  }, []);
+
   const currentTarget = useCallback((): string | null => {
     for (let k = 0; k < SOLUTION_INDICES.length; k++) {
       const id = RAW_ARROWS[SOLUTION_INDICES[k]].id;
-      if (!arrowsRef.current[id]?.gone) return id;
+      if (!arrowsRef.current[id]?.gone && isExitPathClear(id)) return id;
+    }
+    for (let i = 0; i < RAW_ARROWS.length; i++) {
+      const id = RAW_ARROWS[i].id;
+      if (!arrowsRef.current[id]?.gone && isExitPathClear(id)) return id;
     }
     return null;
-  }, []);
+  }, [isExitPathClear]);
 
   const collide = useCallback((id: string) => {
     const a = arrowsRef.current[id];
@@ -458,39 +482,14 @@ export default function Level18() {
     [dispatch, currentLevelId]
   );
 
-  const isExitPathClear = useCallback((id: string): boolean => {
-    const a = arrowsRef.current[id];
-    if (!a || a.gone) return false;
-    const [dc, dr] = a.path.dir;
-    const sdc = Math.round(dc);
-    const sdr = Math.round(dr);
-    let [c, r] = a.def.pts[a.def.pts.length - 1];
-
-    const occ = new Set<string>();
-    ARROWS.forEach((o) => {
-      if (o.id === id || arrowsRef.current[o.id]?.gone) return;
-      o.cells.forEach(([cc, rr]) => occ.add(`${cc},${rr}`));
-    });
-
-    c += sdc;
-    r += sdr;
-    while (c >= 0 && c < GRID.cols && r >= 0 && r < GRID.rows) {
-      if (occ.has(`${c},${r}`)) return false;
-      c += sdc;
-      r += sdr;
-    }
-    return true;
-  }, []);
-
   const tryRemove = useCallback(
     (id: string) => {
       const a = arrowsRef.current[id];
       if (!a || a.gone || a.busy || isInputLockedRef.current) return;
 
-      const target = currentTarget();
       const clear = isExitPathClear(id);
 
-      if (id !== target && !clear) {
+      if (!clear) {
         collide(id);
         return;
       }
@@ -498,7 +497,7 @@ export default function Level18() {
       playTapSound(true);
       removeArrow(id);
     },
-    [currentTarget, isExitPathClear, collide, removeArrow]
+    [isExitPathClear, collide, removeArrow]
   );
 
   const buildBoard = useCallback(() => {
@@ -660,7 +659,7 @@ export default function Level18() {
         {/* Header */}
         <header className="lvl18-topbar">
           <div className="lvl18-btns">
-            <button className="lvl18-round-btn" onClick={handleHome} aria-label="Back">
+            <button className="lvl18-round-btn" onClick={handleLevels} aria-label="Back">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
                 <path d="M15 5l-7 7 7 7" />
               </svg>

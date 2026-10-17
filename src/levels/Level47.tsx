@@ -619,7 +619,7 @@ export default function Level47() {
         {/* Header */}
         <header className="lvl47-topbar">
           <div className="lvl47-btns">
-            <button className="lvl47-round-btn" onClick={handleHome} aria-label="Back">
+            <button className="lvl47-round-btn" onClick={handleLevels} aria-label="Back">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
                 <path d="M15 5l-7 7 7 7" />
               </svg>

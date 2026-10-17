@@ -708,7 +708,7 @@ export default function Level40() {
         {/* Header */}
         <header className="lvl40-topbar">
           <div className="lvl40-btns">
-            <button className="lvl40-round-btn" onClick={handleHome} aria-label="Back">
+            <button className="lvl40-round-btn" onClick={handleLevels} aria-label="Back">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
                 <path d="M15 5l-7 7 7 7" />
               </svg>

@@ -642,7 +642,7 @@ export default function Level11() {
       <div className="lvl11-app" ref={appRef} id="app">
         {/* Header */}
         <header className="lvl11-topbar">
-          <button className="lvl11-top-btn lvl11-back" onClick={handleHome} aria-label="Back">
+          <button className="lvl11-top-btn lvl11-back" onClick={handleLevels} aria-label="Back">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
               <path d="M15 5l-7 7 7 7" />
             </svg>

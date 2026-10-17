@@ -666,7 +666,7 @@ export default function Level12() {
       <div className="lvl12-app" ref={appRef} id="app">
         {/* Header */}
         <header className="lvl12-topbar">
-          <button className="lvl12-top-btn lvl12-back" onClick={handleHome} aria-label="Back">
+          <button className="lvl12-top-btn lvl12-back" onClick={handleLevels} aria-label="Back">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
               <path d="M15 5l-7 7 7 7" />
             </svg>

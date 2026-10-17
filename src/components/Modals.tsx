@@ -418,8 +418,17 @@ function PauseModal() {
               onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'home' })}
               className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-colors cursor-pointer shrink-0"
               aria-label="Home"
+              title="Home"
             >
               <Home size={20} className="text-slate-800" />
+            </button>
+            <button
+              onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'levels' })}
+              className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-colors cursor-pointer shrink-0"
+              aria-label="All Levels"
+              title="All Levels"
+            >
+              <Grid3x3 size={20} className="text-slate-800" />
             </button>
             <button
               onClick={() => dispatch({ type: 'NEXT_LEVEL' })}

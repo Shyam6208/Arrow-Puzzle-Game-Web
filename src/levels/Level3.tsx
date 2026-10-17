@@ -507,7 +507,7 @@ export default function Level3() {
       <div className="lvl3-app" ref={appRef}>
         {/* Header */}
         <header className="lvl3-topbar">
-          <button className="lvl3-round-btn lvl3-back" onClick={handleHome} aria-label="Back">
+          <button className="lvl3-round-btn lvl3-back" onClick={handleLevels} aria-label="Back">
             <svg viewBox="0 0 24 24">
               <path d="M16 4L6 12l10 8z" />
             </svg>
@@ -534,6 +534,16 @@ export default function Level3() {
               </span>
             ))}
           </div>
+          <button
+            className="lvl3-round-btn lvl3-settings"
+            onClick={() => dispatch({ type: 'SET_MODAL', modal: 'pause' })}
+            aria-label="Settings"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.9 1.9-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-2.68v-.08a1.7 1.7 0 0 0-1.04-1.56 1.7 1.7 0 0 0-1.88.34l-.06.06-1.9-1.9.06-.06A1.7 1.7 0 0 0 7.7 15a1.7 1.7 0 0 0-1.56-1.04H6v-2.68h.14A1.7 1.7 0 0 0 7.7 10.2a1.7 1.7 0 0 0-.34-1.88l-.06-.06 1.9-1.9.06.06a1.7 1.7 0 0 0 1.88-.34 1.7 1.7 0 0 0 1.04-1.56V5h2.68v.2a1.7 1.7 0 0 0 1.04 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06 1.9 1.9-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.56 1.04H21v2.68h-.04A1.7 1.7 0 0 0 19.4 15z" />
+            </svg>
+          </button>
         </header>
 
         {/* Board SVG Wrap */}

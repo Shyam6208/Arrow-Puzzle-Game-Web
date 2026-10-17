@@ -608,7 +608,7 @@ export default function Level7() {
       <div className="lvl7-app" ref={appRef} id="app">
         {/* Header */}
         <header className="lvl7-topbar">
-          <button className="lvl7-top-btn lvl7-back" onClick={handleHome} aria-label="Back">
+          <button className="lvl7-top-btn lvl7-back" onClick={handleLevels} aria-label="Back">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
               <path d="M15 5l-7 7 7 7" />
             </svg>

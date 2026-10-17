@@ -26,6 +26,31 @@ body {
   background: #edf2f7;
 }
 
+/* ============ BOARD PAN & ARROW CURSOR SYSTEM ============ */
+[class*="-board-wrap"],
+.zoom-board-wrapper,
+#board-wrap {
+  cursor: grab;
+  touch-action: none;
+}
+
+[class*="-arrow"],
+[class*="-arrow"] *,
+.lvl1-arrow,
+.lvl1-arrow * {
+  cursor: pointer;
+}
+
+body.is-board-dragging,
+body.is-board-dragging *,
+body.is-board-dragging [class*="-arrow"],
+body.is-board-dragging [class*="-arrow"] * {
+  cursor: grabbing !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
+
 /* ============ FULLY RESPONSIVE & ADAPTIVE STAGES FOR ALL DEVICES ============ */
 .landing-page-stage {
   position: relative;

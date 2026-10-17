@@ -102,11 +102,9 @@ const RAW_ARROWS: ArrowDef[] = [
   { id: 'a83', pts: [[19, 23], [19, 24], [19, 25]] },
   { id: 'a84', pts: [[20, 1], [20, 2], [20, 3], [20, 4], [20, 5], [20, 6], [20, 7], [20, 8]] },
   { id: 'a85', pts: [[20, 12], [20, 13], [20, 14], [20, 15], [20, 16], [20, 17], [20, 18], [20, 19]] },
-  { id: 'a86', pts: [[12, 4], [13, 4], [13, 5], [13, 6], [12, 6], [11, 6]], free: 1 },
-  { id: 'a87', pts: [[14, 20], [14, 21], [14, 22], [14, 23], [14, 24], [14, 25], [14, 26], [15, 26], [15, 25], [15, 24], [15, 23], [15, 22], [15, 21], [16, 21], [17, 21], [18, 21], [18, 22], [18, 23], [18, 24], [18, 25], [18, 26], [19, 26], [20, 26], [20, 25], [20, 24], [20, 23], [20, 22], [20, 21], [19, 21], [19, 22]], free: 1 },
 ];
 
-/* 100% verified removal solution sequence (88/88 arrows) */
+/* 100% verified removal solution sequence (86/86 arrows) */
 const SOLUTION_IDS: string[] = [
   'a0', 'a1', 'a4', 'a6', 'a13', 'a14', 'a17', 'a18', 'a36', 'a37',
   'a40', 'a46', 'a52', 'a53', 'a58', 'a70', 'a80', 'a71', 'a60', 'a73',
@@ -116,11 +114,11 @@ const SOLUTION_IDS: string[] = [
   'a12', 'a16', 'a22', 'a23', 'a27', 'a29', 'a30', 'a21', 'a24', 'a32',
   'a33', 'a34', 'a35', 'a38', 'a39', 'a41', 'a42', 'a43', 'a44', 'a45',
   'a51', 'a50', 'a56', 'a59', 'a61', 'a57', 'a63', 'a69', 'a66', 'a75',
-  'a55', 'a48', 'a54', 'a72', 'a64', 'a68', 'a86', 'a87',
+  'a55', 'a48', 'a54', 'a72', 'a64', 'a68',
 ];
 
 function cellsOf(def: ArrowDef): [number, number][] {
-  const out: [number, number][] = [];
+  const out: [number, number][] = [[def.pts[0][0], def.pts[0][1]]];
   for (let i = 1; i < def.pts.length; i++) {
     let [c, r] = def.pts[i - 1];
     const [c2, r2] = def.pts[i];
@@ -404,13 +402,11 @@ export default function Level29() {
   const isExitPathClear = useCallback((id: string): boolean => {
     const a = arrowsRef.current[id];
     if (!a || a.gone) return false;
-    if (a.def.free) return true;
 
     const ray = new Set(rayCells(a.def));
     const isBlocked = ARROWS.some(
       (o) =>
         o.id !== id &&
-        !o.free &&
         !arrowsRef.current[o.id]?.gone &&
         o.cells?.some(([c, r]) => ray.has(`${c},${r}`))
     );
@@ -443,7 +439,6 @@ export default function Level29() {
         ARROWS.some(
           (o) =>
             o.id !== id &&
-            !o.free &&
             !arrowsRef.current[o.id]?.gone &&
             o.cells?.some(([cc, rr]) => cc === c && rr === r)
         )
@@ -548,7 +543,7 @@ export default function Level29() {
               dispatch({
                 type: 'COMPLETE_LEVEL_DIRECT',
                 levelId: currentLevelId,
-                moves: 88,
+                moves: 86,
                 stars: 3,
               });
             }, 380);
@@ -739,7 +734,7 @@ export default function Level29() {
         {/* Header */}
         <header className="lvl29-topbar">
           <div className="lvl29-btns">
-            <button className="lvl29-round-btn" onClick={handleHome} aria-label="Back">
+            <button className="lvl29-round-btn" onClick={handleLevels} aria-label="Back">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
                 <path d="M15 5l-7 7 7 7" />
               </svg>
@@ -823,7 +818,7 @@ export default function Level29() {
           </button>
           <button
             className="lvl29-round lvl29-calculator"
-            onClick={() => showToast('Level 29: 88 Arrows')}
+            onClick={() => showToast('Level 29: 86 Arrows')}
             aria-label="Info"
           >
             <span className="lvl29-calc-icon">

@@ -16,7 +16,7 @@ interface ArrowDef {
 
 const RAW_ARROWS: ArrowDef[] = [
   { id: 'a0', pts: [[7, 0], [9, 0], [9, 1], [11, 1], [11, 2], [8, 2], [8, 1], [7, 1], [7, 2]] },
-  { id: 'a1', pts: [[24, 1], [22, 1], [22, 0], [19, 0], [19, 1], [17, 1], [17, 3], [15, 3], [15, 4]] },
+  { id: 'a1', pts: [[24, 1], [22, 1], [22, 0], [19, 0], [19, 1], [17, 1], [17, 2], [15, 2], [15, 3]] },
   { id: 'a2', pts: [[3, 1], [4, 1], [4, 2], [2, 2], [2, 3], [1, 3], [1, 5]] },
   { id: 'a3', pts: [[6, 1], [5, 1], [5, 2], [6, 2], [6, 3], [13, 3]] },
   { id: 'a4', pts: [[25, 2], [21, 2], [21, 1], [20, 1], [20, 2], [18, 2], [18, 3], [25, 3]] },
@@ -644,7 +644,7 @@ export default function Level6() {
       <div className="lvl6-app" ref={appRef} id="app">
         {/* Header */}
         <header className="lvl6-topbar">
-          <button className="lvl6-top-btn lvl6-back" onClick={handleHome} aria-label="Back">
+          <button className="lvl6-top-btn lvl6-back" onClick={handleLevels} aria-label="Back">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
               <path d="M15 5l-7 7 7 7" />
             </svg>
